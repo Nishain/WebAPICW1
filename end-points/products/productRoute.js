@@ -22,5 +22,6 @@ router.post('/',async (req,res)=>{
 router.put('/:id',async (req,res)=>{
     const product = await Product.findById(req.params.id)
     if(product)
+        res.send()
 })
 module.exports = router
