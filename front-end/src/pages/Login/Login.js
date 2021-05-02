@@ -1,5 +1,4 @@
-
-import '../pages/css/Style.css'
+import './css/Style.css'
 import  {setPasswordToggler,fullHeight} from './js/main.js'
 //import './js/popper.js'
 import './js/main'
