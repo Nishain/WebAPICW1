@@ -30,9 +30,9 @@ export default class TopNavigation extends Component {
     Menu <span class="badge badge-light">{this.props.notificationCount}</span>
   </button>
   <div className="dropdown-menu dropdown-menu-right">
-    <a className="dropdown-item"><span className="col-sm-8 float-left">My Cart</span><span className="badge badge-danger">4</span></a>
+    <a className="dropdown-item \">My Cart <span className="badge badge-danger">4</span></a>
     <a className="dropdown-item">Another action</a>
-    <a className="dropdown-item">Notifications <span className="badge badge-danger">{this.props.notificationCount}</span></a>
+    <a className="dropdown-item d-flex ">Notifications <span className="badge badge-danger">{this.props.notificationCount}</span></a>
     <div className="dropdown-divider"></div>
     <a className="dropdown-item">Sign Out</a>
   </div>
