@@ -6,11 +6,14 @@ import  'popper.js'
 
 import bg from './images/bg.jpg'
 import { Component } from 'react'
-
+import {GoogleLogin} from 'react-google-login'
 export class Login extends Component{
   componentDidMount(){
     fullHeight()
     setPasswordToggler()
+  }
+  async handleLogin(googleData){
+    console.log(googleData)
   }
   render(){
     return(
@@ -86,11 +89,19 @@ export class Login extends Component{
                         className="social-icon d-flex align-items-center justify-content-center"
                         ><span className="fa fa-facebook"></span
                       ></a>
-                      <a
-                        href="#"
-                        className="social-icon d-flex align-items-center justify-content-center"
-                        ><span className="fa fa-twitter"></span
-                      ></a>
+                      <GoogleLogin
+                        clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
+                        isSignedIn={false}
+                        render={btnProps=><a
+                          className="social-icon d-flex align-items-center justify-content-center" onClick={btnProps.onClick} disabled={btnProps.disabled}
+                          ><span className="fa fa-google"></span
+                        ></a>}
+                        onSuccess={this.handleLogin}
+                        onFailure={this.handleLogin}
+                        
+                        cookiePolicy={'single_host_origin'}
+/>
+                      
                     </p>
                   </div>
                 </div>
