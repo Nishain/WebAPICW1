@@ -3,10 +3,10 @@ import  {setPasswordToggler,fullHeight} from './js/main.js'
 //import './js/popper.js'
 import './js/main'
 import  'popper.js'
-
 import bg from './images/bg.jpg'
 import { Component } from 'react'
-import {GoogleLogin,useGoogleLogout,} from 'react-google-login'
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props'
+import {GoogleLogin} from 'react-google-login'
 import { data } from 'jquery'
 import axios from 'axios'
 
@@ -22,20 +22,16 @@ import axios from 'axios'
     setPasswordToggler()
    }
 
-  onSignOutSuccess = async (googleData)=>{
-    console.log('successfully logged out')
-    console.log(googleData)
-  }
-  onSignOutFail = async (data)=>{
-    console.log('logged out failed')
-    console.log(data)
-  }
   
    handleLogin = async (googleData)=>{
     console.log(googleData)
   }
   handleInputChange(event){
     this.setState({[event.target.name]: event.target.value})
+  }
+  onFacebookSignIn(data){
+    window.FB.logout()
+    console.log(data)
   }
   async sendEmail(){
     const result = await (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/forgetPassword',{'email':this.state.email})).data
@@ -112,11 +108,17 @@ import axios from 'axios'
                     </p>
                     <div className="w-100">
                       <p className="social-media d-flex justify-content-center">
-                        <a
-                          href="#"
-                          className="social-icon d-flex align-items-center justify-content-center"
+                        <FacebookLogin 
+                        appId="4334533943277653" 
+                        render={btnProps=>
+                          <a
+                          className="social-icon d-flex align-items-center justify-content-center" onClick={btnProps.onClick} disabled={btnProps.disabled}
                           ><span className="fa fa-facebook"></span
-                        ></a>
+                        ></a>}
+                         callback={this.onFacebookSignIn}
+                         fields="name,email,picture"
+                         />
+                        
                         <GoogleLogin
                           clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
                           isSignedIn={false}
