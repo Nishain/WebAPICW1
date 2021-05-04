@@ -2,8 +2,9 @@
   "name": "web-api-cw1",
   "version": "1.0.0",
   "description": "This project handles shopping cart solution for the users",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "nodemon app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,7 +22,10 @@
   },
   "homepage": "https://github.com/Nishain/WebAPICW1#readme",
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "mongoose": "^5.12.5"
+    "mongoose": "^5.12.5",
+    "nodemailer": "^6.6.0"
   }
 }

@@ -18,4 +18,4 @@ const schema = mongoose.Schema({
         enum:categories
     }
 })
-module.exports = mongoose.model(schema,"Product")
+module.exports = mongoose.model("Product",schema)
