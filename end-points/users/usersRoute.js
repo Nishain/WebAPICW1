@@ -30,4 +30,10 @@ router.post('/forgetPassword',(req,res)=>{
         }
     })
 })
+router.post('auth',(req,res)=>{
+    let email = req.body["email"]
+    let password = req.body["password"]
+    
+    console.log(req.ip)
+})
 module.exports = router
