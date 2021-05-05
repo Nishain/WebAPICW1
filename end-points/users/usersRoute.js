@@ -24,7 +24,7 @@ router.post('/forgetPassword',(req,res)=>{
         from:process.env.email,
         to:req.body.email
     }
-    emailOptions = constants.designEmailContent(emailOptions,'somthing_for_now')
+    emailOptions = constants.designEmailContent('somthing_for_now',emailOptions)
     transporter.sendMail(emailOptions,(err,data)=>{
         if(err){
             res.send({success:false,message:err})
@@ -41,14 +41,5 @@ router.post('/',async (req,res)=>{
     newUser = Helper.showFields(newUser,['email','phoneNumber'],['password'])
     res.send(newUser)
 })
-router.post('auth',async (req,res)=>{
-    let email = req.body["email"]
-    let password = req.body["password"]
-    if (!(typeof email == 'string' && typeof password == 'string'))
-        return Helper.badRequest(res,"provide valid email and password on body")
-    const user = await User.findOne({email:email,password:password})
-    if(user)
-        res.send({message:'you are authenticated'})
-    console.log(req.ip)
-})
+
 module.exports = router

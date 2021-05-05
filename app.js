@@ -3,13 +3,13 @@ const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
 const app = express()
-const productRoute = require('./end-points/products/productRoute')
-const userRoutes = require('./end-points/users/usersRoute')
 app.use(cors())
 app.use(express.json())
+app.use(require('./middleware/IPCheck'))
 //users/forgetPassword
-app.use('/users/',userRoutes)
-app.use('/products/',productRoute)
+app.use('/auth/',require('./end-points/auth/auth'))
+app.use('/users/',require('./end-points/users/usersRoute'))
+app.use('/products/',require('./end-points/products/productRoute'))
 mongoose.connect(
     "mongodb://localhost/quickPhotos"
     ,{useNewUrlParser:true,useUnifiedTopology:true}).then(()=>{
@@ -17,7 +17,6 @@ mongoose.connect(
 }).catch((err)=>{
     console.log('error has occured when connecting database '+err)
 })
-app.listen(5000,()=>{
-    console.log("server started on port "+5000)
-    require('./constants').Port = 5000
+app.listen(process.env.PORT,()=>{
+    console.log("server started on port "+process.env.PORT)
 })
