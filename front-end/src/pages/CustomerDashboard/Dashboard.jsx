@@ -3,6 +3,10 @@ import TopNavigation from "./TopNavigation";
 import $ from "jquery";
 export class Dashboard extends Component {
   hiddenFileInput = React.createRef();
+  constructor(){
+    super()
+    this.signOut = this.signOut.bind(this)
+  }
   state = {
     uploadedFiles:[],
   };
@@ -18,10 +22,13 @@ export class Dashboard extends Component {
       this.state.uploadedFiles.splice(deleteIndex,1)
       this.setState({uploadedFiles:this.state.uploadedFiles})
   }
+  signOut(){
+    this.props.history.replace('/')
+  }
   render() {
     return (
       <section>
-        <TopNavigation items={2} />
+        <TopNavigation items={2} signOut={this.signOut}/>
         <div className="container row">
           <div class="card col-3 m-3">
             <div class="card-body">

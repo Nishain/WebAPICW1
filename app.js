@@ -10,6 +10,12 @@ app.use(require('./middleware/IPCheck'))
 app.use('/auth/',require('./end-points/auth/auth'))
 app.use('/users/',require('./end-points/users/usersRoute'))
 app.use('/products/',require('./end-points/products/productRoute'))
+app.use((req,res)=>{
+    res.send({
+        pingSuccess:true,
+        message:"didn't match any route"
+    })
+})
 mongoose.connect(
     "mongodb://localhost/quickPhotos"
     ,{useNewUrlParser:true,useUnifiedTopology:true}).then(()=>{

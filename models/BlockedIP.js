@@ -7,7 +7,7 @@ const schema = mongoose.Schema({
     },
     attempts:{
         type:Number,
-        default:0
+        default:1
     },
 })
 module.exports = mongoose.model("BlockedIP",schema)
