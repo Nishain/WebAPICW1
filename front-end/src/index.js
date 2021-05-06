@@ -9,6 +9,10 @@ import adminLogin from "./pages/Admin/Login/adminLogin";
 import Layout from "./pages/Admin/Shared/Layout/Layout";
 import Dashboard from "./pages/Admin/Dashboard/Dashboard";
 import UserProfile from "./pages/Admin/UserProfile/UserProfile";
+import Orders from "./pages/Admin/Orders/Orders";
+import CourierService from "./pages/Admin/CourierService/CourierService";
+import Transaction from "./pages/Admin/Transaction/Transaction";
+import Category from "./pages/Admin/Category/Category";
 import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.js";
@@ -27,8 +31,12 @@ ReactDOM.render(
   <Router>
     <Layout/>
     <Switch>
-      <Route exact path="/AdminDashboard" component={Dashboard} />
-      <Route exact path="/UserProfile" component={UserProfile} />
+      <Route exact path="/Admin/AdminDashboard" component={Dashboard} />
+      <Route exact path="/Admin/UserProfile" component={UserProfile} />
+      <Route exact path="/Admin/Orders" component={Orders} />
+      <Route exact path="/Admin/CourierService" component={CourierService} />
+      <Route exact path="/Admin/Transaction" component={Transaction} />
+      <Route exact path="/Admin/Category" component={Category} />
     </Switch>
   </Router>
   </React.StrictMode>,
