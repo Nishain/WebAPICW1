@@ -3,6 +3,7 @@ const User = require('../../models/User')
 const BlockedIP = require('../../models/BlockedIP')
 const constants = require('../../constants')
 const Helper = require('../helper')
+const helper = require('../helper')
 router.get('/ip/:ip',async (req,res)=>{
     const foundIP = await BlockedIP.findOne({ip:req.params.ip})
     if(foundIP && foundIP.attempts > 3)
@@ -12,8 +13,9 @@ router.get('/ip/:ip',async (req,res)=>{
 router.post('/',async (req,res)=>{
     let email = req.body["email"]
     let password = req.body["password"]
-    if (!(typeof email == 'string' && typeof password == 'string'))
-        return Helper.badRequest(res,"provide valid email and password on body")
+    console.log(`${email} ${password}`)
+    if (!helper.validateFields(req,res,{email:'String',password:'String'}))
+        return
     const user = await User.findOne({email:email,password:password})
     if(user){
         BlockedIP.findOneAndRemove({ip:req.ip})
@@ -33,7 +35,7 @@ router.post('/',async (req,res)=>{
         }else{
             await new BlockedIP({ip:req.ip}).save()
         }
-        res.send({authorize:false,message:'unauthorized',attemptsRemain: 4 - (params.attempts || 1)})    
+        res.send({authorize:false,message:'unauthorized',attemptsRemain: 3 - (params.attempts || 1)})    
     }
 })
 module.exports = router
