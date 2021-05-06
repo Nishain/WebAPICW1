@@ -1,9 +1,9 @@
 import React from 'react'
 
-export default function Dashboard() {
+export default function UserProfile() {
     return (
         <div className="container">
-            <h1>Dashbord</h1>
+            <h1>User Profile</h1>
         </div>
     )
 }
