@@ -1,5 +1,6 @@
 const express = require('express')
 class Constants {
+    clientURL = 'http://localhost:3000'
     url = `http://localhost:${process.env.PORT}/`
     emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
     regexMapping = {

@@ -11,6 +11,8 @@ import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props
 import { GoogleLogin } from "react-google-login";
 import axios from "axios";
 import { BottomButton } from "./BottomButton";
+import cookie from 'js-cookie'
+
 export class Login extends Component {
   state = { isBlocked: false, isLogin: true };
   registerfields = [
@@ -26,22 +28,31 @@ export class Login extends Component {
   ];
   constructor() {
     super();
+    
+   // Axios.defaults.withCredentials = true
     this.tapLoginOrRegisterBtn = this.tapLoginOrRegisterBtn.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.login = this.login.bind(this);
     this.swapFunctionality = this.swapFunctionality.bind(this);
-    
+    this.rememberMe = this.rememberMe.bind(this)
   }
+  
   componentDidMount() {
     fullHeight();
     setPasswordToggler();
+    
+    this.setState({rememberMe:localStorage.getItem('rememberMe') || 1})
     axios.interceptors.response.use(
       (response) => {
         return response;
       },
       (error) => {
-        if (error.response.status == 401 && error.response.data.IPBlocked) {
+        console.log(error)
+        if (error.response.status == 401 && error.response.data.invalidToken){
+          console.log('ouch! invalid token')
+        }
+        else if (error.response.status == 401 && error.response.data.IPBlocked) {
           this.setState({ isBlocked: true });
         }
         return error.response;
@@ -70,7 +81,7 @@ export class Login extends Component {
     console.log(result);
   }
   async ping() {
-    axios.get(process.env.REACT_APP_API_ENDPOINT);
+    await axios.get(process.env.REACT_APP_API_ENDPOINT);
   }
   swapFunctionality() {
     this.setState({ isLogin: !this.state.isLogin });
@@ -140,11 +151,10 @@ export class Login extends Component {
     axios
       .post(process.env.REACT_APP_API_ENDPOINT + "auth/",params)
       .then((response) => {
-        console.log(response.data); //attemptsRemain
-
+        console.log(response.data); 
         if (response.data.authorize) {
           this.setState({ errorMessage: undefined });
-          this.props.history.replace("/Dashboard");
+          //this.props.history.replace("/Dashboard");
         } else if (response.data.attemptsRemain != undefined) {
           this.setState({
             errorMessage: `Invalid credentials only ${response.data.attemptsRemain} attempts remaining`,
@@ -182,6 +192,11 @@ export class Login extends Component {
           tapLoginOrRegisterBtn={this.tapLoginOrRegisterBtn}/>}
         </div>)
   }
+ 
+  rememberMe(event){
+    this.setState({rememberMe:this.state.rememberMe == 1 ? 2:1})
+    localStorage.setItem('rememberMe',this.state.rememberMe)
+  }
   renderForm() {
     return (
       <form className="signin-form d-md-flex">
@@ -200,7 +215,7 @@ export class Login extends Component {
             <div className="w-50 text-left">
               <label className="checkbox-wrap checkbox-primary mb-0">
                 Remember Me
-                <input type="checkbox" onChange={() => {}} />
+                <input type="checkbox" checked={this.state.rememberMe == 2} onChange={this.rememberMe} />
                 <span className="checkmark"></span>
               </label>
             </div>

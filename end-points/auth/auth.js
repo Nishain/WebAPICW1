@@ -2,7 +2,7 @@ const router = require('express').Router()
 const User = require('../../models/User')
 const BlockedIP = require('../../models/BlockedIP')
 const constants = require('../../constants')
-const Helper = require('../helper')
+const jwt = require('jsonwebtoken')
 const helper = require('../helper')
 router.get('/ip/:ip',async (req,res)=>{
     const foundIP = await BlockedIP.findOne({ip:req.params.ip})
@@ -19,7 +19,11 @@ router.post('/',async (req,res)=>{
     const user = await User.findOne({email:email,password:password})
     if(user){
         BlockedIP.findOneAndRemove({ip:req.ip})
-        res.send({authorize:true,message:'you are authenticated'})
+        res.cookie('jwt',{
+            token:jwt.sign({email:email},
+            process.env.jwtSecret,//secret
+            {expiresIn:'1h'})
+        }).send({authorize:true,message:'you are authenticated'})
     }
     else{
         const blockedIP = await BlockedIP.findOne({ip:req.ip})

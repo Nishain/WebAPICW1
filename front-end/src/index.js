@@ -8,7 +8,9 @@ import {Dashboard as Customer} from './pages/CustomerDashboard/Dashboard'
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.js';
+import axios from 'axios'
 
+axios.defaults.withCredentials = true
 ReactDOM.render(
   <BrowserRouter>
     <Route exact path='/' component = {Login} />

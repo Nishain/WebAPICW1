@@ -32,5 +32,9 @@ const schema = mongoose.Schema({
         required:true,
         type:String
     },
+    isLogged:{
+        type:Boolean,
+        default:true
+    }
 })
 module.exports = mongoose.model("User",schema)

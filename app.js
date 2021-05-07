@@ -1,13 +1,16 @@
 const cors = require('cors')
 const express = require('express')
 const mongoose = require('mongoose')
+const constants = require('./constants')
+const cookieParser = require('cookie-parser')
 require('dotenv').config()
 const app = express()
-app.use(cors())
+app.use(cors({credentials:true,origin:constants.clientURL}))
+app.use(cookieParser())
 app.use(express.json())
 app.use(require('./middleware/IPCheck'))
-//users/forgetPassword
 app.use('/auth/',require('./end-points/auth/auth'))
+app.use(require('./middleware/CheckCookie'))
 app.use('/users/',require('./end-points/users/usersRoute'))
 app.use('/products/',require('./end-points/products/productRoute'))
 app.use((req,res)=>{
