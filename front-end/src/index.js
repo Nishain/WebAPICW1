@@ -14,8 +14,7 @@ import CourierService from "./pages/Admin/CourierService/CourierService";
 import Transaction from "./pages/Admin/Transaction/Transaction";
 import Category from "./pages/Admin/Category/Category";
 import reportWebVitals from "./reportWebVitals";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.js";
+
 
 ReactDOM.render(
   <React.StrictMode>
