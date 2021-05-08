@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Route, Switch, BrowserRouter as Router } from "react-router-dom";
 import "./index.css";
-import App from "./App";
 import { Login } from "./pages/Login/Login";
 import { Dashboard as Customer } from "./pages/CustomerDashboard/Dashboard";
 import adminLogin from "./pages/Admin/Login/adminLogin";
@@ -13,9 +12,10 @@ import Orders from "./pages/Admin/Orders/Orders";
 import CourierService from "./pages/Admin/CourierService/CourierService";
 import Transaction from "./pages/Admin/Transaction/Transaction";
 import Category from "./pages/Admin/Category/Category";
-import reportWebVitals from "./reportWebVitals";
-
-
+import axios from 'axios'
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.js";
+axios.defaults.withCredentials = true
 ReactDOM.render(
   <React.StrictMode>
   <Router>

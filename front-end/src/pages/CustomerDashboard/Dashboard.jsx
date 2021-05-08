@@ -1,8 +1,14 @@
 import React, { Component } from "react";
 import TopNavigation from "./TopNavigation";
 import $ from "jquery";
+import axios from 'axios'
+import cookie from 'js-cookie'
 export class Dashboard extends Component {
   hiddenFileInput = React.createRef();
+  constructor(){
+    super()
+    this.signOut = this.signOut.bind(this)
+  }
   state = {
     uploadedFiles:[],
   };
@@ -18,10 +24,15 @@ export class Dashboard extends Component {
       this.state.uploadedFiles.splice(deleteIndex,1)
       this.setState({uploadedFiles:this.state.uploadedFiles})
   }
+  async signOut(){
+    await axios.get(process.env.REACT_APP_API_ENDPOINT+'auth/signout/')
+    cookie.remove('jwt')
+    this.props.history.replace('/')
+  }
   render() {
     return (
       <section>
-        <TopNavigation items={2} />
+        <TopNavigation items={2} signOut={this.signOut}/>
         <div className="container row">
           <div class="card col-3 m-3">
             <div class="card-body">

@@ -6,8 +6,7 @@ export function fullHeight () {
 	});
 };
 export function setPasswordToggler (){
-	$(".toggle-password").click(function() {
-
+	$(".toggle-password").on('click',function() {
 		$(this).toggleClass("fa-eye fa-eye-slash");
 		var input = $($(this).attr("toggle"));
 		if (input.attr("type") == "password") {

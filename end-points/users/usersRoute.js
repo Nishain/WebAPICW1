@@ -2,6 +2,7 @@ const router = require('express').Router()
 const nodeMailer = require('nodemailer')
 const constants = require('../../constants')
 const User = require('../../models/User')
+const helper = require('../helper')
 const Helper = require('../helper')
 router.post('/forgetPassword',(req,res)=>{
     console.log({
@@ -34,11 +35,22 @@ router.post('/forgetPassword',(req,res)=>{
     })
 })
 router.post('/',async (req,res)=>{
-    const fields = ['email','password','phoneNumber']
-    if(!Helper.validateFields(req,res,{email:String,password:String,phoneNumber:String}))
+    var mapping = {}
+    var schemaPaths = User.schema.requiredPaths()
+    for(const path of schemaPaths){
+        let value = User.schema.paths[path]
+        mapping[path] = value.instance
+    }
+    if(!Helper.validateFields(req,res,mapping))
         return
-    var newUser = await new User(Helper.mapRequestBodyToObject(req,fields)).save()
-    newUser = Helper.showFields(newUser,['email','phoneNumber'],['password'])
+    if(req.body.password != req.body.confirmPassword){
+        return Helper.fieldError(res,"password and confirm password mismatch",['password','confirmPassword'])
+    }
+    if(await User.findOne({email:req.body.email}))
+        return helper.fieldError(res,`email address ${req.body.email} is already taken`,['email'])
+    var newUser = await new User(Helper.mapRequestBodyToObject(req,Object.keys(mapping))).save()
+    newUser = Helper.showFields(newUser,Object.keys(mapping),['password'])
+    newUser.success = true
     res.send(newUser)
 })
 
