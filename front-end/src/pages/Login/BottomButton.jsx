@@ -1,5 +1,4 @@
-import { Component } from "react"; 
-export function BottomButton(props){
+ export function BottomButton(props){
     return <div className="form-group" >
     <div
       class="alert alert-danger"

@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import TopNavigation from "./TopNavigation";
 import $ from "jquery";
+import axios from 'axios'
+import cookie from 'js-cookie'
 export class Dashboard extends Component {
   hiddenFileInput = React.createRef();
   constructor(){
@@ -22,7 +24,9 @@ export class Dashboard extends Component {
       this.state.uploadedFiles.splice(deleteIndex,1)
       this.setState({uploadedFiles:this.state.uploadedFiles})
   }
-  signOut(){
+  async signOut(){
+    await axios.get(process.env.REACT_APP_API_ENDPOINT+'auth/signout/')
+    cookie.remove('jwt')
     this.props.history.replace('/')
   }
   render() {

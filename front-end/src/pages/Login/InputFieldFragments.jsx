@@ -2,7 +2,7 @@ import { Component } from "react";
 
 export class InputFieldFragments extends Component {
   renderPassword(fieldName){
-      return <div className="form-group">
+      return <div className="form-group" key={fieldName}>
       <label className="label" htmlFor="password">
         {fieldName}
       </label>
@@ -26,7 +26,7 @@ export class InputFieldFragments extends Component {
     const inputFields = this.props.fields.map((field) => {
       return (
         field.toLowerCase().includes('password') ? this.renderPassword(field) : 
-        <div className="form-group mt-3">
+        <div className="form-group mt-3" key={field}>
           <label className="label" htmlFor="name">
             {field}
           </label>

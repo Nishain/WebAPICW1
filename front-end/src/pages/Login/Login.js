@@ -154,7 +154,7 @@ export class Login extends Component {
         console.log(response.data); 
         if (response.data.authorize) {
           this.setState({ errorMessage: undefined });
-          //this.props.history.replace("/Dashboard");
+          this.props.history.replace("/Dashboard");
         } else if (response.data.attemptsRemain != undefined) {
           this.setState({
             errorMessage: `Invalid credentials only ${response.data.attemptsRemain} attempts remaining`,
@@ -287,10 +287,10 @@ export class Login extends Component {
               <div className={this.state.isLogin ? "col-md-12 col-lg-7" : "col-md-12 col-lg-10"} >
                 <div className="login-wrap">
                   {this.state.isBlocked ? (
-                    <div class="card text-center">
-                      <div class="card-body">
-                        <h5 class="card-title">Your IP is tempolary blocked</h5>
-                        <p class="card-text">
+                    <div className="card text-center">
+                      <div className="card-body">
+                        <h5 className="card-title">Your IP is tempolary blocked</h5>
+                        <p className="card-text">
                           This is the result of attempting to fail to login
                           within 3 attempts
                         </p>

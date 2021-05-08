@@ -101,6 +101,9 @@ class Helper {
             fields:affectedFields
         })
     }
+    invalidToken(res,msg){
+        res.status(401).send({invalidToken:true,message:msg})
+    }
     badRequest(res,msg){
         return res.status(400).send({error:true,msg:msg})
     }

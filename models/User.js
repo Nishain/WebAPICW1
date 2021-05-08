@@ -10,6 +10,7 @@ const schema = mongoose.Schema({
     },
     email:{
         required:true,
+        unique:true,
         type:String
     },
     address:{

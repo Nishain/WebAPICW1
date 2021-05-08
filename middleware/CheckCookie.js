@@ -1,14 +1,18 @@
-const jwt = require('jsonwebtoken')
-module.exports = function checkCookie(req, res, next) {
+const jwt = require('jsonwebtoken');
+const helper = require('../end-points/helper');
+const User = require('../models/User')
+module.exports = async function checkCookie(req, res, next) {
   if (!req.cookies.jwt) {
-        return res.status(401).send({invalidToken:true,message:'no token found'})
+        return helper.invalidToken(res,'no token found')
   } else {
     try {
-      console.log(process.env.jwtSecret)  
       const data = jwt.verify(req.cookies["jwt"].token, process.env.jwtSecret);
+      const targetUser = User.findOne({email:data.email,isLogged:true})
+      if(!targetUser) 
+        return helper.invalidToken(res,'user in token is not valid logged user')
       console.log("token email "+data.email);
     } catch (error) {
-        return res.status(401).send({invalidToken:true,message:'invalid token'})
+        return helper.invalidToken(res,'invalid token')
     }
   }
   next();

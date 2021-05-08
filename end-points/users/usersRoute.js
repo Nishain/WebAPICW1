@@ -2,6 +2,7 @@ const router = require('express').Router()
 const nodeMailer = require('nodemailer')
 const constants = require('../../constants')
 const User = require('../../models/User')
+const helper = require('../helper')
 const Helper = require('../helper')
 router.post('/forgetPassword',(req,res)=>{
     console.log({
@@ -44,7 +45,9 @@ router.post('/',async (req,res)=>{
         return
     if(req.body.password != req.body.confirmPassword){
         return Helper.fieldError(res,"password and confirm password mismatch",['password','confirmPassword'])
-    }    
+    }
+    if(await User.findOne({email:req.body.email}))
+        return helper.fieldError(res,`email address ${req.body.email} is already taken`,['email'])
     var newUser = await new User(Helper.mapRequestBodyToObject(req,Object.keys(mapping))).save()
     newUser = Helper.showFields(newUser,Object.keys(mapping),['password'])
     newUser.success = true
