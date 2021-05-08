@@ -12,8 +12,8 @@ app.use(require('./middleware/IPCheck'))
 app.get('/',(req,res)=>{
     return res.send({pingSuccess:true})
 })
-app.use('/auth/',require('./end-points/auth/auth'))
 app.use(require('./middleware/CheckCookie'))
+app.use('/auth/',require('./end-points/auth/auth'))
 app.use('/users/',require('./end-points/users/usersRoute'))
 app.use('/products/',require('./end-points/products/productRoute'))
 app.use((req,res)=>{
