@@ -29,7 +29,7 @@ const data = [
     address: "London No. 2 Lake Park",
   },
 ];
-export default function UserProfile() {
+export default function UserProfile() {   
   const [searchText, setsearchText] = useState("");
   const [searchedColumn, setsearchedColumn] = useState("");
   const getColumnSearchProps = (dataIndex) => ({

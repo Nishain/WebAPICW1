@@ -15,6 +15,7 @@ import Category from "./pages/Admin/Category/Category";
 import axios from 'axios'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.js";
+import "antd/dist/antd.css"
 axios.defaults.withCredentials = true
 ReactDOM.render(
   <React.StrictMode>
