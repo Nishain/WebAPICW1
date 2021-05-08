@@ -3,7 +3,6 @@ const helper = require('../end-points/helper');
 const User = require('../models/User')
 module.exports = async function checkCookie(req, res, next) {
   const exceptions = ['/users/','/auth/']  
-  console.log(req.path)
   if(exceptions.includes(req.path))
     return next()
   if (!req.cookies.jwt) {

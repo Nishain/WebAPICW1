@@ -4,6 +4,7 @@ const constants = require('../../constants')
 const User = require('../../models/User')
 const helper = require('../helper')
 const Helper = require('../helper')
+//const RandomCodeGenerator = require('crypto-random-string')
 router.post('/forgetPassword',(req,res)=>{
     console.log({
         user:process.env.email,
@@ -25,7 +26,7 @@ router.post('/forgetPassword',(req,res)=>{
         from:process.env.email,
         to:req.body.email
     }
-    emailOptions = constants.designEmailContent('somthing_for_now',emailOptions)
+    emailOptions = constants.designEmailContent(RandomCodeGenerator({length: 10, type: 'url-safe'}),emailOptions)
     transporter.sendMail(emailOptions,(err,data)=>{
         if(err){
             res.send({success:false,message:err})
@@ -33,6 +34,10 @@ router.post('/forgetPassword',(req,res)=>{
             res.send({success:true,message:'email successfully sent!'})
         }
     })
+})
+router.get('/forgetPassword/:code',async (req,res)=>{
+    // User.find
+    // req.params.code
 })
 router.post('/',async (req,res)=>{
     var mapping = {}

@@ -36,6 +36,10 @@ const schema = mongoose.Schema({
     isLogged:{
         type:Boolean,
         default:true
+    },
+    forgetPasswordCode:{
+        type : String,
+        unique : true
     }
 })
 module.exports = mongoose.model("User",schema)
