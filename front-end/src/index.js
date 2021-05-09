@@ -17,6 +17,11 @@ import reportWebVitals from "./reportWebVitals";
 import endPoints from './pages/endPoints'
 import 'bootstrap/dist/js/bootstrap'
 
+import axios from 'axios'
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.js";
+import "antd/dist/antd.css"
+axios.defaults.withCredentials = true
 ReactDOM.render(
   <React.StrictMode>
   <Router>
