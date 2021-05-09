@@ -2,9 +2,11 @@ const jwt = require('jsonwebtoken');
 const helper = require('../end-points/helper');
 const User = require('../models/User')
 module.exports = async function checkCookie(req, res, next) {
-  const exceptions = ['/users/','/auth/']  
-  if(exceptions.includes(req.path))
+  console.log(req.path)
+  const exceptions = ['/users/','/auth/','/users/forgetPassword']  
+  if(exceptions.findIndex(p=>req.path.startsWith(p)) > -1)
     return next()
+   
   if (!req.cookies.jwt) {
         return helper.invalidToken(res,'no token found')
   } else {

@@ -37,6 +37,14 @@ const schema = mongoose.Schema({
         type:Boolean,
         default:true
     },
+    isActive:{
+        type:Boolean,
+        default:true
+    },
+    isEmailConfirmed:{
+        type:Boolean,
+        default:false
+    },
     forgetPasswordCode:{
         type : String,
         unique : true

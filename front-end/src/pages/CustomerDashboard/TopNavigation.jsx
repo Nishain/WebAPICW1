@@ -1,4 +1,5 @@
 import { Component } from "react";
+import {Link} from 'react-router-dom'
 import icon from '../common/photo.png'
 
 export default class TopNavigation extends Component {
@@ -12,7 +13,7 @@ export default class TopNavigation extends Component {
   render() {
     return (
       <nav className="navbar navbar-light bg-light">
-        <link className="navbar-brand">
+        <Link className="navbar-brand">
           <img
             src={icon}
             width="30"
@@ -20,7 +21,7 @@ export default class TopNavigation extends Component {
             className="d-inline-block align-top"
             alt=""
           /><span>  Easy Quick Photo</span>
-        </link> 
+        </Link> 
         <form className="form-inline">
           <input
             className="form-control mr-sm-2"
@@ -38,11 +39,11 @@ export default class TopNavigation extends Component {
     Menu <span class="badge badge-light">{this.props.notificationCount}</span>
   </button>
   <div className="dropdown-menu dropdown-menu-right">
-    <link className="dropdown-item \">My Cart <span className="badge badge-danger">4</span></link> 
-    <link className="dropdown-item">Another action</link> 
-    <link className="dropdown-item d-flex ">Notifications <span className="badge badge-danger">{this.props.notificationCount}</span></link> 
+    <Link className="dropdown-item \">My Cart <span className="badge badge-danger">4</span></Link> 
+    <Link className="dropdown-item">Another action</Link> 
+    <Link className="dropdown-item d-flex ">Notifications <span className="badge badge-danger">{this.props.notificationCount}</span></Link> 
     <div className="dropdown-divider"></div>
-    <link className="dropdown-item" onClick={this.signOut}>Sign Out</link> 
+    <Link className="dropdown-item" onClick={this.signOut}>Sign Out</Link> 
   </div>
 </div>
       </nav>

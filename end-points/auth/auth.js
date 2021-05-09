@@ -26,8 +26,8 @@ router.post('/',async (req,res)=>{
     }
     else{
         const blockedIP = await BlockedIP.findOne({ip:req.ip})
+        var params = {lastDate:Date.now()}
         if(blockedIP){
-            var params = {lastDate:Date.now()}
             if (blockedIP.attempts > 2){
                 await blockedIP.set(params).save()
                 return res.status(401).send({message:constants.exceedAttemptsLogin})

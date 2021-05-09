@@ -1,3 +1,4 @@
+const Mongoose = require('mongoose')
 const constants = require('../constants')
 class Helper {
     validateFields(req,res,structure){
@@ -103,6 +104,9 @@ class Helper {
     }
     invalidToken(res,msg){
         res.status(401).send({invalidToken:true,message:msg})
+    }
+    isObjectIDValid(id){
+        return Mongoose.Types.ObjectId.isValid(id)
     }
     badRequest(res,msg){
         return res.status(400).send({error:true,msg:msg})
