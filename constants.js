@@ -19,6 +19,7 @@ class Constants {
     designEmailConfimationBody(code,object){
         object.subject='Quick photo Email confirmation'
         object.text = `enter this code for email verification - ${code}`
+        return object
     }
 }
 const contant = new Constants()

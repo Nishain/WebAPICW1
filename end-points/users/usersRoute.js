@@ -17,7 +17,8 @@ const transporter = nodeMailer.createTransport({
     }
 })
 var emailOptions = {
-    from:process.env.email
+    from:process.env.email,
+    to:''
 }
 async function sendCodeToEmail(role,req,res){
     console.log({
@@ -51,11 +52,13 @@ router.post('/verify',async (req,res)=>{
             return
         const code = req.body.code 
         const email = req.body.email   
-        const target = User.findOne({email:email,emailConfirmationCode:code})
+        const target = await User.findOne({email:email,emailConfirmationCode:code})
         if(!target)
             res.send({confirmSuccess:false,message:'the user does not exist'})
-        else
+        else{
+            await target.set({isEmailConfirmed:true,emailConfirmationCode:code}).save()
             res.send({confirmSuccess:true})    
+        }
     }else
         sendCodeToEmail('emailConfirm',req,res)
 })

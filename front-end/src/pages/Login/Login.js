@@ -15,7 +15,12 @@ import cookie from 'js-cookie'
 import {Modal,Button} from 'antd'
 
 export class Login extends Component {
-  state = { isBlocked: false, isLogin: true,isForgetCodeInvalid:false,shouldShowEmailConfimation:false };
+  state = { isBlocked: false,
+    isLogin: true,
+    isForgetCodeInvalid:false,
+    shouldShowEmailConfimation:false,
+    proccessEmailValidation:false
+   };
   registerfields = [
     "Email",
     "Password",
@@ -37,6 +42,7 @@ export class Login extends Component {
     this.login = this.login.bind(this);
     this.swapFunctionality = this.swapFunctionality.bind(this);
     this.rememberMe = this.rememberMe.bind(this)
+    this.submitEmailConfirmCode = this.submitEmailConfirmCode.bind(this)
   }
   
   componentDidMount() {
@@ -125,7 +131,8 @@ export class Login extends Component {
     
     if (!this.showErrorFieldsIfNeeded(result)) {
       if(result.success){
-        return this.props.history.replace('/Dashboard')
+        return this.requestEmailConfirmation()
+        //return this.props.history.replace('/Dashboard')
       }
       this.setState({ errorMessage: undefined });
     }
@@ -179,7 +186,8 @@ export class Login extends Component {
       .then((response) => {
         console.log(response.data); 
         if(response.data.requiredToConfirm){
-          this.setState({shouldShowEmailConfimation:true})
+          this.setState({ errorMessage: undefined });
+          this.requestEmailConfirmation()
           return
         }
         if (response.data.authorize) {
@@ -298,15 +306,28 @@ export class Login extends Component {
     );
   }
   async requestEmailConfirmation(){
-    (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email}))
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email})).data
+    if(this.showErrorFieldsIfNeeded(result))
+      return
+    console.log(result)  
+    if(result.success){
+      this.setState({shouldShowEmailConfimation:true})
+    }
   }
   async submitEmailConfirmCode(){
-    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email})).data
-    //console.log
+    const code = this.state['Email Verification code']
+    this.setState({proccessEmailValidation:true})
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email,code:code})).data
+    console.log(result)
+    if(result.confirmSuccess){
+      this.onEmailConfimationClose()
+    }
   }
-  onEmailConfimationCancel(){
-    this.state.
-    this.setState({})
+  onEmailConfimationClose(){
+    this.setState({
+      shouldShowEmailConfimation:false,
+      proccessEmailValidation:false
+    })
   }
   render() {
       
@@ -318,8 +339,9 @@ export class Login extends Component {
           objectFit: "cover",
         }}
       >
-      <Modal visible={this.state.shouldShowEmailConfimation} confirmLoading={this.state.proccessEmailValidation || false}
-       onOk={this.requestEmailConfirmation}>
+      <Modal visible={this.state.shouldShowEmailConfimation} confirmLoading={this.state.proccessEmailValidation}
+       onCancel={this.onEmailConfimationClose}
+       onOk={this.submitEmailConfirmCode}>
         <p>We have sent you the code to your email address.Check it and type the code below</p>
         <InputFieldFragments
         fields={["Email Verification code"]}
