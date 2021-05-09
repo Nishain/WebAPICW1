@@ -87,7 +87,6 @@ export class Login extends Component {
         this.setState({isForgetCodeInvalid:true})
       }
     }
-
   }
   swapFunctionality() {
     this.setState({ isLogin: !this.state.isLogin });

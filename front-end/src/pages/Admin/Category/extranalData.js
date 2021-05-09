@@ -1,8 +1,8 @@
 export const CategoryValues = {
-    categoryname: "",
+    categoryName: "",
     price: "",
   };
   export const CategoryTypes = {
-    category: "categoryname",
+    category: "categoryName",
     price: "price",
   };

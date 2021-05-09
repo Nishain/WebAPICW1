@@ -9,6 +9,7 @@ function mapRequestBodyToSchema(req){
     return new Category(obj)
 }
 router.get('/category',async (req,res)=>{
+
     const categoryList = await Category.find()
     res.send(categoryList)
 })
@@ -17,7 +18,7 @@ router.post('/category',async (req,res)=>{
     try {
         res.send(await newCategory.save())
     } catch (error) {
-        return badRequest(res,error)
+        return Helper.badRequest(res,error)
     }  
 })
 module.exports = router

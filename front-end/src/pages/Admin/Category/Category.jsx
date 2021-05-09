@@ -1,7 +1,7 @@
 import React, {  useState } from "react";
 import { Input } from 'antd';
 import{CategoryValues,CategoryTypes} from "./extranalData"
-
+import axios from 'axios'
 
 
 export default function Category() {
@@ -14,6 +14,17 @@ export default function Category() {
     });
   
   }
+  const  addCategory = async ()=>
+  {
+    
+    
+    const result = (await axios.post(
+      "http://localhost:5000/Admin/category",category
+      
+    )).data
+    // this.setState({ articleId: response.data.id });
+  }
+  
   return (
     <div className="container">
       <div className="row">
@@ -25,7 +36,7 @@ export default function Category() {
             <div className="card-body">
               <div className="form-group">
                 <label>Enter Category Name</label>
-                <Input placeholder="Basic usage"  value={category.categoryname} onChange={onChangeHandler(
+                <Input placeholder="Basic usage"  value={category.categoryName} onChange={onChangeHandler(
                         CategoryTypes.category
                       )}/>
               </div>
@@ -37,7 +48,7 @@ export default function Category() {
               <button
                 className="btn btn-primary"
                 type="button"
-                // onclick="addCategory()"
+                 onClick={addCategory}
               >
                 Add
               </button>
