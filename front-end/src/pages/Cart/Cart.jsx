@@ -19,7 +19,7 @@ const Cart =() => {
               <th scope="col">Size</th>
               <th scope="col">Unit Price</th>
               <th scope="col">Qty</th>
-              <th scope="col">Total Price</th>
+              <th scope="col">Total Amount</th>
               <th scope="col">Action</th>
             </tr>
           </thead>

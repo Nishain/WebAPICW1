@@ -7,6 +7,7 @@ import { Login } from "./pages/Login/Login";
 import { Dashboard as Customer } from "./pages/CustomerDashboard/Dashboard";
 import ProductView from "./pages/ProductView/ProductView";
 import Cart from "./pages/Cart/Cart";
+import Invoice from "./pages/Invoice/Invoice";
 import adminLogin from "./pages/Admin/Login/adminLogin";
 import Layout from "./pages/Admin/Shared/Layout/Layout";
 import Dashboard from "./pages/Admin/Dashboard/Dashboard";
@@ -33,6 +34,7 @@ ReactDOM.render(
       <Route exact path="/forgetPassword/:code" render={(props)=><Login {...props} forgetPassword={true} />} />
       <Route exact path="/ProductView" component={ProductView} /> 
       <Route exact path="/Cart" component={Cart} /> 
+      <Route exact path="/Invoice" component={Invoice}/> 
       <Route exact path={endPoints.dashboard} component={Customer} />
       <Route exact path="/AdminLogin" component={adminLogin} />
       {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
