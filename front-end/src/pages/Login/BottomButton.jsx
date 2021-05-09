@@ -12,7 +12,7 @@
       className="form-control btn btn-secondary rounded submit px-3"
       onClick={props.tapLoginOrRegisterBtn}
     >
-      {props.isLogin ? 'Login' : 'Sign Up'}
+      {props.buttonLabel}
     </button>
   </div>
 }
