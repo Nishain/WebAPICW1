@@ -3,7 +3,7 @@ import { Input } from "antd";
 import { Button } from "antd";
 import { Image } from "antd";
 
-export default function ViewProduct() {
+const ProductView= ()=> {
   return (
     <div className="container">
         <div className="row">
@@ -38,3 +38,4 @@ export default function ViewProduct() {
     </div>
   );
 }
+export default ProductView
