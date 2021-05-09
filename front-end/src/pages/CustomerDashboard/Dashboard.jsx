@@ -34,21 +34,21 @@ export class Dashboard extends Component {
       <section>
         <TopNavigation items={2} signOut={this.signOut}/>
         <div className="container row">
-          <div class="card col-3 m-3">
-            <div class="card-body">
-              <h5 class="card-title">Notifications</h5>
-              <p class="card-text">Your Order is ready collect them</p>
+          <div className="card col-3 m-3">
+            <div className="card-body">
+              <h5 className="card-title">Notifications</h5>
+              <p className="card-text">Your Order is ready collect them</p>
               <button className="btn btn-info">View invoice</button>
-              <p class="card-text">
-                <small class="text-muted">Last updated 3 mins ago</small>
+              <p className="card-text">
+                <small className="text-muted">Last updated 3 mins ago</small>
               </p>
             </div>
           </div>
           <div className="col-6 m-3">
             <div className="card row" >
                 <div className="card-body col">
-                    <h5 class="card-title">Create an Order</h5>
-                    <p class="card-text">Create and order</p>
+                    <h5 className="card-title">Create an Order</h5>
+                    <p className="card-text">Create and order</p>
                     <input
                     ref={this.hiddenFileInput}
                     type="file"
@@ -66,9 +66,9 @@ export class Dashboard extends Component {
                     </button>
                 </div>    
                 <div className="card-body col">
-                    <ul class="list-group list-group-flush">
+                    <ul className="list-group list-group-flush">
                         {this.state.uploadedFiles.slice(0,3).map(file=>
-                            <li class="list-group-item">
+                            <li className="list-group-item">
                                 <span >{file}</span><button className="btn btn-outline-danger float-right" onClick={()=>this.removeFile(file)}>Remove</button>
                             </li>
                         )}

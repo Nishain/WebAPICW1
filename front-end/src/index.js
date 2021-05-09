@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Route, Switch, BrowserRouter as Router } from "react-router-dom";
 import "./index.css";
+import App from "./App";
 import { Login } from "./pages/Login/Login";
 import { Dashboard as Customer } from "./pages/CustomerDashboard/Dashboard";
 import adminLogin from "./pages/Admin/Login/adminLogin";
@@ -12,6 +13,10 @@ import Orders from "./pages/Admin/Orders/Orders";
 import CourierService from "./pages/Admin/CourierService/CourierService";
 import Transaction from "./pages/Admin/Transaction/Transaction";
 import Category from "./pages/Admin/Category/Category";
+import reportWebVitals from "./reportWebVitals";
+import endPoints from './pages/endPoints'
+import 'bootstrap/dist/js/bootstrap'
+
 import axios from 'axios'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.js";
@@ -22,21 +27,22 @@ ReactDOM.render(
   <Router>
     <Switch>
       <Route exact path="/" component={Login} />
-      <Route exact path="/Dashboard" component={Customer} />
+      <Route exact path="/forgetPassword/:code" render={(props)=><Login {...props} forgetPassword={true} />} />
+      <Route exact path={endPoints.dashboard} component={Customer} />
       <Route exact path="/AdminLogin" component={adminLogin} />
       {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
     </Switch>
   </Router>
   {/* admin */}
   <Router>
-    <Layout/>
+  <Layout/>
     <Switch>
-      <Route exact path="/Admin/AdminDashboard" component={Dashboard} />
-      <Route exact path="/Admin/UserProfile" component={UserProfile} />
-      <Route exact path="/Admin/Orders" component={Orders} />
-      <Route exact path="/Admin/CourierService" component={CourierService} />
-      <Route exact path="/Admin/Transaction" component={Transaction} />
-      <Route exact path="/Admin/Category" component={Category} />
+      <Route exact path={endPoints.admin.dashboard} component={Dashboard} />
+      <Route exact path={endPoints.admin.userProfile} component={UserProfile} />
+      <Route exact path={endPoints.admin.orders} component={Orders} />
+      <Route exact path={endPoints.admin.courierService} component={CourierService} />
+      <Route exact path={endPoints.admin.transaction} component={Transaction} />
+      <Route exact path={endPoints.admin.category} component={Category} />
     </Switch>
   </Router>
   </React.StrictMode>,

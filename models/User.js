@@ -36,6 +36,18 @@ const schema = mongoose.Schema({
     isLogged:{
         type:Boolean,
         default:true
+    },
+    isActive:{
+        type:Boolean,
+        default:true
+    },
+    isEmailConfirmed:{
+        type:Boolean,
+        default:false
+    },
+    forgetPasswordCode:{
+        type : String,
+        unique : true
     }
 })
 module.exports = mongoose.model("User",schema)

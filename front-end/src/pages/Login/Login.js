@@ -4,7 +4,7 @@ import { setPasswordToggler, fullHeight } from "./js/main.js";
 import "./js/main";
 import "popper.js";
 import bg from "./images/bg.jpg";
-import ReactDom from "react-dom";
+import {router} from "react-router-dom";
 import { Component } from "react";
 import { InputFieldFragments } from "./InputFieldFragments";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
@@ -14,7 +14,7 @@ import { BottomButton } from "./BottomButton";
 import cookie from 'js-cookie'
 
 export class Login extends Component {
-  state = { isBlocked: false, isLogin: true };
+  state = { isBlocked: false, isLogin: true,isForgetCodeInvalid:false };
   registerfields = [
     "Email",
     "Password",
@@ -72,24 +72,41 @@ export class Login extends Component {
     console.log(data);
   }
   async sendEmail() {
-    const result = await (
-      await axios.post(
+    const result = (await axios.post(
         process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword",
-        { email: this.state.email }
-      )
-    ).data;
+        { email: this.state.Email }
+      )).data
+    this.showErrorFieldsIfNeeded(result)
     console.log(result);
   }
   async ping() {
     await axios.get(process.env.REACT_APP_API_ENDPOINT);
+    if(this.props.forgetPassword){
+      const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword/" + this.props.match.params.code)).data
+      if(result.forgetPasswordPing && !result.userExist){
+        this.setState({isForgetCodeInvalid:true})
+      }
+    }
+
   }
   swapFunctionality() {
     this.setState({ isLogin: !this.state.isLogin });
     this.invalidateFields([]);
     this.setState({ errorMessage: undefined });
   }
-  async registerAccount() {
+  getParamsFromInput(modelFields){
     var params = {};
+    for (const key in this.state) {
+      const index = modelFields.findIndex(
+        (mf) =>
+          mf.toLocaleLowerCase() == key.replace(" ", "").toLocaleLowerCase()
+      );
+      if (index < 0) continue;
+      params[modelFields[index]] = this.state[key];
+    }
+    return params
+  }
+  async registerAccount() {
     const modelFields = [
       "firstName",
       "lastName",
@@ -101,30 +118,42 @@ export class Login extends Component {
       "zipCode",
       "phoneNumber",
     ];
-    for (const key in this.state) {
-      const index = modelFields.findIndex(
-        (mf) =>
-          mf.toLocaleLowerCase() == key.replace(" ", "").toLocaleLowerCase()
-      );
-      if (index < 0) continue;
-      params[modelFields[index]] = this.state[key];
-    }
     const result = (
-      await axios.post(process.env.REACT_APP_API_ENDPOINT + "users/", params)
+      await axios.post(process.env.REACT_APP_API_ENDPOINT + "users/", this.getParamsFromInput(modelFields))
     ).data;
     
-    if (result.fieldError) {
-      this.invalidateFields(result.fields);
-      this.setState({ errorMessage: result.msg });
-    } else {
+    if (!this.showErrorFieldsIfNeeded(result)) {
       if(result.success){
-        this.props.history.replace('/Dashboard')
+        return this.props.history.replace('/Dashboard')
       }
       this.setState({ errorMessage: undefined });
     }
   }
+  showErrorFieldsIfNeeded(result){
+    if (result.fieldError) {
+      this.invalidateFields(result.fields);
+      this.setState({ errorMessage: result.msg });
+      return true
+    }
+    return false
+  }
+  async forgetPassword(){
+    var params = this.getParamsFromInput(['password','confirmPassword'])
+    params.editPassword = true
+    const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword/" + this.props.match.params.code,
+    params)).data
+    if(this.showErrorFieldsIfNeeded(result))
+      return
+    if(result.passwordChanged){
+      return this.props.history.replace('/')
+    }  
+    console.log(result)
+  }
   tapLoginOrRegisterBtn() {
-    if (this.state.isLogin) this.login();
+    if(this.props.forgetPassword){
+      this.forgetPassword()
+    }
+    else if (this.state.isLogin) this.login();
     else this.registerAccount();
   }
   invalidateFields(invalidFields) {
@@ -144,43 +173,39 @@ export class Login extends Component {
  
   login() {
     let modelPaths = ["email","password"]
-    var params = {}
-    for(const key in this.state){
-      params[modelPaths.find(p=>p.toLowerCase() == key.toLowerCase())] = this.state[key]
-    }
     axios
-      .post(process.env.REACT_APP_API_ENDPOINT + "auth/",params)
+      .post(process.env.REACT_APP_API_ENDPOINT + "auth/",this.getParamsFromInput(modelPaths))
       .then((response) => {
         console.log(response.data); 
         if (response.data.authorize) {
           this.setState({ errorMessage: undefined });
-          this.props.history.replace("/Dashboard");
+          return this.props.history.replace("/Dashboard");
         } else if (response.data.attemptsRemain != undefined) {
           this.setState({
             errorMessage: `Invalid credentials only ${response.data.attemptsRemain} attempts remaining`,
           });
-        } else if (response.data.fieldError) {
-          this.invalidateFields(response.data.fields);
-          this.setState({ errorMessage: response.data.msg });
-        }
+        } 
+        this.showErrorFieldsIfNeeded(response.data)
       })
       .catch((error) => {
         console.log(error);
       });
   }
-  
   renderInputFieldFragments(isLogin){
-    const book = isLogin ? [["Email","Password"]] :[
+    var book = isLogin ? [["Email","Password"]] :[
       ["Email","Password","Confirm Password"],
       [ "First Name","Last Name","Phone Number","Address"],
       [ "City","Zip Code"]
     ]
+    if(this.props.forgetPassword){
+      book = [["Password","Confirm Password"]]
+    }
     if(!isLogin)
       setPasswordToggler()
     return book.map((page,index)=>
         <div className="half p-4 py-md-5">
           {index == 0 && <div className="w-100">
-            <h3 className="mb-4">Sign {isLogin ? 'In':'Up'}</h3>
+            <h3 className="mb-4">{this.props.forgetPassword ? 'Forget Password' : `Sign ${isLogin ? 'In':'Up'}`}</h3>
           </div>
           }
         <InputFieldFragments
@@ -188,6 +213,7 @@ export class Login extends Component {
         handleInputChange={this.handleInputChange} />
         {index == (book.length -1) && <BottomButton 
           errorMessage={this.state.errorMessage} 
+          buttonLabel={this.props.forgetPassword ? 'Change Password' : (this.state.isLogin ? 'Login' : 'Sign Up')}
           isLogin={this.state.isLogin} 
           tapLoginOrRegisterBtn={this.tapLoginOrRegisterBtn}/>}
         </div>)
@@ -200,6 +226,7 @@ export class Login extends Component {
   renderForm() {
     return (
       <form className="signin-form d-md-flex">
+
         {this.renderInputFieldFragments(this.state.isLogin)}
         <div className="half p-4 py-md-5 bg-primary">
           <div className="form-group">
@@ -286,13 +313,14 @@ export class Login extends Component {
             <div className="row justify-content-center">
               <div className={this.state.isLogin ? "col-md-12 col-lg-7" : "col-md-12 col-lg-10"} >
                 <div className="login-wrap">
-                  {this.state.isBlocked ? (
+                  {this.state.isBlocked || (this.props.forgetPassword && this.state.isForgetCodeInvalid) ? (
                     <div className="card text-center">
                       <div className="card-body">
-                        <h5 className="card-title">Your IP is tempolary blocked</h5>
+                        <h5 className="card-title">{this.state.isBlocked ? 'Your IP is tempolary blocked':'Invalid Forget password code'}</h5>
                         <p className="card-text">
-                          This is the result of attempting to fail to login
-                          within 3 attempts
+                          { (this.state.isBlocked && <>This is the result of attempting to fail to login
+                          within 3 attempts</>) || <>Invalid forget password code please check your email address</>
+                          }
                         </p>
                       </div>
                     </div>
