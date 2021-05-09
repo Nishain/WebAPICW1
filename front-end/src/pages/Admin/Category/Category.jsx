@@ -1,6 +1,19 @@
-import React from "react";
+import React, {  useState } from "react";
 import { Input } from 'antd';
+import{CategoryValues,CategoryTypes} from "./extranalData"
+
+
+
 export default function Category() {
+  const [category, setCategory] = useState(CategoryValues)
+  const onChangeHandler = (type) => (e) => {
+   
+    setCategory({
+      ...category,
+      [type]: e.target.value,
+    });
+  
+  }
   return (
     <div className="container">
       <div className="row">
@@ -12,15 +25,19 @@ export default function Category() {
             <div className="card-body">
               <div className="form-group">
                 <label>Enter Category Name</label>
-                <Input placeholder="Basic usage" />
+                <Input placeholder="Basic usage"  value={category.categoryname} onChange={onChangeHandler(
+                        CategoryTypes.category
+                      )}/>
               </div>
               <div className="form-group">
-              <Input placeholder="Amount" />
+              <Input placeholder="Amount" value={category.price} onChange={onChangeHandler(
+                        CategoryTypes.price
+                      )} />
               </div>
               <button
                 className="btn btn-primary"
                 type="button"
-                onclick="addCategory()"
+                // onclick="addCategory()"
               >
                 Add
               </button>
