@@ -12,9 +12,10 @@ import { GoogleLogin } from "react-google-login";
 import axios from "axios";
 import { BottomButton } from "./BottomButton";
 import cookie from 'js-cookie'
+import {Modal,Button} from 'antd'
 
 export class Login extends Component {
-  state = { isBlocked: false, isLogin: true,isForgetCodeInvalid:false };
+  state = { isBlocked: false, isLogin: true,isForgetCodeInvalid:false,shouldShowEmailConfimation:false };
   registerfields = [
     "Email",
     "Password",
@@ -177,6 +178,10 @@ export class Login extends Component {
       .post(process.env.REACT_APP_API_ENDPOINT + "auth/",this.getParamsFromInput(modelPaths))
       .then((response) => {
         console.log(response.data); 
+        if(response.data.requiredToConfirm){
+          this.setState({shouldShowEmailConfimation:true})
+          return
+        }
         if (response.data.authorize) {
           this.setState({ errorMessage: undefined });
           return this.props.history.replace("/Dashboard");
@@ -292,7 +297,19 @@ export class Login extends Component {
       </form>
     );
   }
+  async requestEmailConfirmation(){
+    (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email}))
+  }
+  async submitEmailConfirmCode(){
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email})).data
+    //console.log
+  }
+  onEmailConfimationCancel(){
+    this.state.
+    this.setState({})
+  }
   render() {
+      
     return (
       <div
         className="img"
@@ -301,6 +318,13 @@ export class Login extends Component {
           objectFit: "cover",
         }}
       >
+      <Modal visible={this.state.shouldShowEmailConfimation} confirmLoading={this.state.proccessEmailValidation || false}
+       onOk={this.requestEmailConfirmation}>
+        <p>We have sent you the code to your email address.Check it and type the code below</p>
+        <InputFieldFragments
+        fields={["Email Verification code"]}
+        handleInputChange={this.handleInputChange} />
+        </Modal>
         <section className="ftco-section">
           <div className="container">
             <div className="row justify-content-center">

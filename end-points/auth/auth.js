@@ -17,6 +17,9 @@ router.post('/',async (req,res)=>{
         if(blockedIP){
             await blockedIP.deleteOne()
         }
+        if(!user.isEmailConfirmed){
+            res.send({requiredToConfirm:true})
+        }
         await user.set({isLogged:true}).save()
         res.cookie('jwt',{
             token:jwt.sign({email:email},

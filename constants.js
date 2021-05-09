@@ -16,6 +16,10 @@ class Constants {
         object.text = `follow this link for forget password - ${this.clientURL}/forgetPassword/${code}`
         return object
     }
+    designEmailConfimationBody(code,object){
+        object.subject='Quick photo Email confirmation'
+        object.text = `enter this code for email verification - ${code}`
+    }
 }
 const contant = new Constants()
 module.exports = contant
