@@ -4,6 +4,7 @@ import { Route, Switch, BrowserRouter as Router } from "react-router-dom";
 import "./index.css";
 import { Login } from "./pages/Login/Login";
 import { Dashboard as Customer } from "./pages/CustomerDashboard/Dashboard";
+import ViewProduct from "./pages/ProductView/ProductView";
 import adminLogin from "./pages/Admin/Login/adminLogin";
 import Layout from "./pages/Admin/Shared/Layout/Layout";
 import Dashboard from "./pages/Admin/Dashboard/Dashboard";
@@ -16,13 +17,15 @@ import axios from 'axios'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.js";
 import "antd/dist/antd.css"
+import ProductView from "./pages/ProductView/ProductView";
 axios.defaults.withCredentials = true
 ReactDOM.render(
   <React.StrictMode>
   <Router>
     <Switch>
       <Route exact path="/" component={Login} />
-      <Route exact path="/Dashboard" component={Customer} />
+      <Route exact path="/Dashboard" component={Customer} />  
+      <Route exact path="/ProductView" component={ProductView} />  
       <Route exact path="/AdminLogin" component={adminLogin} />
       {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
     </Switch>
