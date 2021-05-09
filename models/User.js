@@ -45,9 +45,7 @@ const schema = mongoose.Schema({
         type:Boolean,
         default:false
     },
-    forgetPasswordCode:{
-        type : String,
-        unique : true
-    }
+    forgetPasswordCode:String,
+    emailConfirmationCode:String
 })
 module.exports = mongoose.model("User",schema)

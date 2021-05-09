@@ -6,29 +6,31 @@ const helper = require('../helper')
 const Helper = require('../helper')
 const RandomCodeGenerator = require('randomatic');
 const { Mongoose } = require('mongoose')
-router.post('/forgetPassword',async (req,res)=>{
+const transporter = nodeMailer.createTransport({
+    service:'Gmail',
+    auth:{
+        user:process.env.email,
+        pass:process.env.password
+    },tls: {
+        // do not fail on invalid certs
+        rejectUnauthorized: false
+    }
+})
+var emailOptions = {
+    from:process.env.email,
+    to:''
+}
+async function sendCodeToEmail(role,req,res){
     console.log({
         user:process.env.email,
         password:process.env.password
     })
-    const transporter = nodeMailer.createTransport({
-        service:'Gmail',
-        auth:{
-            user:process.env.email,
-            pass:process.env.password
-        },tls: {
-            // do not fail on invalid certs
-            rejectUnauthorized: false
-        }
-    })
     if(typeof req.body.email != 'string')
         return Helper.fieldError(res,'Please provide a valid email address',['email'])
-    var emailOptions = {
-        from:process.env.email,
-        to:req.body.email
-    }
+    emailOptions.to = req.body.email
     const code = RandomCodeGenerator('Aa0',10)
-    emailOptions = constants.designEmailContent(code,emailOptions)
+    emailOptions = (role == 'forgetPassword') ? constants.designEmailContent(code,emailOptions) 
+        : constants.designEmailConfimationBody(code,emailOptions)
     const targetUser = await User.findOne({email:req.body.email})
     if(!targetUser)
         return helper.fieldError(res,'email does not exist',['email'])
@@ -36,11 +38,31 @@ router.post('/forgetPassword',async (req,res)=>{
         if(err){
             res.send({success:false,message:err})
         }else{
-            targetUser.set({forgetPasswordCode:code}).save()
+            targetUser.set((role == 'forgetPassword') ? {forgetPasswordCode:code} : {emailConfirmationCode:code}).save()
             res.send({success:true,message:'email successfully sent!'})
         }
     })
+}
+router.post('/forgetPassword',async (req,res)=>{
+    sendCodeToEmail('forgetPassword',req,res)
 })
+router.post('/verify',async (req,res)=>{
+    if(typeof req.body.code == 'string'){
+        if(!helper.validateFields(req,res,{email:'String',code:'String'}))
+            return
+        const code = req.body.code 
+        const email = req.body.email   
+        const target = await User.findOne({email:email,emailConfirmationCode:code})
+        if(!target)
+            res.send({confirmSuccess:false,message:'the user does not exist'})
+        else{
+            await target.set({isEmailConfirmed:true,emailConfirmationCode:code}).save()
+            res.send({confirmSuccess:true})    
+        }
+    }else
+        sendCodeToEmail('emailConfirm',req,res)
+})
+
 router.put('/forgetPassword/:code',async (req,res)=>{
      const targetUser = await User.findOne({forgetPasswordCode:req.params.code})
      if(req.body.editPassword){
@@ -61,6 +83,7 @@ router.put('/forgetPassword/:code',async (req,res)=>{
             res.send({forgetPasswordPing : true, userExist:false})   
      }
 })
+
 router.get('/',async (req,res)=>{
     const userList = await User.find()
     userList.map(acc => {

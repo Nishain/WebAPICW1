@@ -12,9 +12,15 @@ import { GoogleLogin } from "react-google-login";
 import axios from "axios";
 import { BottomButton } from "./BottomButton";
 import cookie from 'js-cookie'
+import {Modal,Button} from 'antd'
 
 export class Login extends Component {
-  state = { isBlocked: false, isLogin: true,isForgetCodeInvalid:false };
+  state = { isBlocked: false,
+    isLogin: true,
+    isForgetCodeInvalid:false,
+    shouldShowEmailConfimation:false,
+    proccessEmailValidation:false
+   };
   registerfields = [
     "Email",
     "Password",
@@ -36,6 +42,7 @@ export class Login extends Component {
     this.login = this.login.bind(this);
     this.swapFunctionality = this.swapFunctionality.bind(this);
     this.rememberMe = this.rememberMe.bind(this)
+    this.submitEmailConfirmCode = this.submitEmailConfirmCode.bind(this)
   }
   
   componentDidMount() {
@@ -123,7 +130,8 @@ export class Login extends Component {
     
     if (!this.showErrorFieldsIfNeeded(result)) {
       if(result.success){
-        return this.props.history.replace('/Dashboard')
+        return this.requestEmailConfirmation()
+        //return this.props.history.replace('/Dashboard')
       }
       this.setState({ errorMessage: undefined });
     }
@@ -176,6 +184,11 @@ export class Login extends Component {
       .post(process.env.REACT_APP_API_ENDPOINT + "auth/",this.getParamsFromInput(modelPaths))
       .then((response) => {
         console.log(response.data); 
+        if(response.data.requiredToConfirm){
+          this.setState({ errorMessage: undefined });
+          this.requestEmailConfirmation()
+          return
+        }
         if (response.data.authorize) {
           this.setState({ errorMessage: undefined });
           return this.props.history.replace("/Dashboard");
@@ -291,7 +304,32 @@ export class Login extends Component {
       </form>
     );
   }
+  async requestEmailConfirmation(){
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email})).data
+    if(this.showErrorFieldsIfNeeded(result))
+      return
+    console.log(result)  
+    if(result.success){
+      this.setState({shouldShowEmailConfimation:true})
+    }
+  }
+  async submitEmailConfirmCode(){
+    const code = this.state['Email Verification code']
+    this.setState({proccessEmailValidation:true})
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email,code:code})).data
+    console.log(result)
+    if(result.confirmSuccess){
+      this.onEmailConfimationClose()
+    }
+  }
+  onEmailConfimationClose(){
+    this.setState({
+      shouldShowEmailConfimation:false,
+      proccessEmailValidation:false
+    })
+  }
   render() {
+      
     return (
       <div
         className="img"
@@ -300,6 +338,14 @@ export class Login extends Component {
           objectFit: "cover",
         }}
       >
+      <Modal visible={this.state.shouldShowEmailConfimation} confirmLoading={this.state.proccessEmailValidation}
+       onCancel={this.onEmailConfimationClose}
+       onOk={this.submitEmailConfirmCode}>
+        <p>We have sent you the code to your email address.Check it and type the code below</p>
+        <InputFieldFragments
+        fields={["Email Verification code"]}
+        handleInputChange={this.handleInputChange} />
+        </Modal>
         <section className="ftco-section">
           <div className="container">
             <div className="row justify-content-center">
