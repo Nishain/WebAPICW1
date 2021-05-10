@@ -5,7 +5,8 @@ const User = require('../../models/User')
 const helper = require('../helper')
 const Helper = require('../helper')
 const RandomCodeGenerator = require('randomatic');
-const { Mongoose } = require('mongoose')
+const bycrypt = require('bcrypt')
+const urlSafeBase64 = require('url-safe-base64')
 const transporter = nodeMailer.createTransport({
     service:'Gmail',
     auth:{
@@ -28,17 +29,21 @@ async function sendCodeToEmail(role,req,res){
     if(typeof req.body.email != 'string')
         return Helper.fieldError(res,'Please provide a valid email address',['email'])
     emailOptions.to = req.body.email
-    const code = RandomCodeGenerator('Aa0',10)
-    emailOptions = (role == 'forgetPassword') ? constants.designEmailContent(code,emailOptions) 
-        : constants.designEmailConfimationBody(code,emailOptions)
+    
     const targetUser = await User.findOne({email:req.body.email})
     if(!targetUser)
         return helper.fieldError(res,'email does not exist',['email'])
-    transporter.sendMail(emailOptions,(err,data)=>{
+    const code = (role == 'forgetPassword') ? urlSafeBase64.encode(await bycrypt.hash(req.body.email + RandomCodeGenerator('Aa0',10),1)): RandomCodeGenerator('A0',10)
+    emailOptions = (role == 'forgetPassword') ? constants.designEmailContent(code,emailOptions) 
+        : constants.designEmailConfimationBody(code,emailOptions)
+    
+    transporter.sendMail(emailOptions,async (err,data)=>{
         if(err){
             res.send({success:false,message:err})
         }else{
-            targetUser.set((role == 'forgetPassword') ? {forgetPasswordCode:code} : {emailConfirmationCode:code}).save()
+            const paramBody = (role == 'forgetPassword') ? {forgetPasswordCode:code} : {emailConfirmationCode:code}
+            console.log(paramBody)
+            await targetUser.set(paramBody).save()
             res.send({success:true,message:'email successfully sent!'})
         }
     })
@@ -54,9 +59,9 @@ router.post('/verify',async (req,res)=>{
         const email = req.body.email   
         const target = await User.findOne({email:email,emailConfirmationCode:code})
         if(!target)
-            res.send({confirmSuccess:false,message:'the user does not exist'})
+            res.send({fieldError:true,message:'the user does not exist'})
         else{
-            await target.set({isEmailConfirmed:true,emailConfirmationCode:code}).save()
+            await target.set({isEmailConfirmed:true,emailConfirmationCode:undefined}).save()
             res.send({confirmSuccess:true})    
         }
     }else

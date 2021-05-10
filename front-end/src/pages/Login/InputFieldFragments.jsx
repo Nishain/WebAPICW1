@@ -1,6 +1,20 @@
 import { Component } from "react";
 
 export class InputFieldFragments extends Component {
+  
+  renderDropdown(fieldName,data){
+    
+    return <div className="form-group" key={fieldName}>
+      <label className="label" htmlFor="password">
+        {fieldName}
+      </label>
+      <select class="form-control" name={fieldName} onChange={this.props.handleInputChange}>
+        {
+          data.map(val=><option className="dropdown-item" value={val} key={val}>{val}</option>)
+        }
+      </select>
+    </div>
+  }
   renderPassword(fieldName){
       return <div className="form-group" key={fieldName}>
       <label className="label" htmlFor="password">
@@ -25,6 +39,7 @@ export class InputFieldFragments extends Component {
   render() {
     const inputFields = this.props.fields.map((field) => {
       return (
+        field.toLowerCase() == 'district' ? this.renderDropdown(field,this.props.dropDownItems) : 
         field.toLowerCase().includes('password') ? this.renderPassword(field) : 
         <div className="form-group mt-3" key={field}>
           <label className="label" htmlFor="name">

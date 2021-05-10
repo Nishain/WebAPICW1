@@ -29,6 +29,10 @@ const schema = mongoose.Schema({
         required:true,
         type:String
     },
+    district:{
+        required:true,
+        type:String
+    },
     phoneNumber:{
         required:true,
         type:String

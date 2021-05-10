@@ -13,7 +13,7 @@ import axios from "axios";
 import { BottomButton } from "./BottomButton";
 import cookie from 'js-cookie'
 import {Modal,Button} from 'antd'
-
+import endPoints from '../endPoints'
 export class Login extends Component {
   state = { isBlocked: false,
     isLogin: true,
@@ -37,18 +37,19 @@ export class Login extends Component {
     
    // Axios.defaults.withCredentials = true
     this.tapLoginOrRegisterBtn = this.tapLoginOrRegisterBtn.bind(this);
-    this.sendEmail = this.sendEmail.bind(this);
+    this.requestForgetPassword = this.requestForgetPassword.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.login = this.login.bind(this);
     this.swapFunctionality = this.swapFunctionality.bind(this);
     this.rememberMe = this.rememberMe.bind(this)
     this.submitEmailConfirmCode = this.submitEmailConfirmCode.bind(this)
+    this.onEmailConfimationClose = this.onEmailConfimationClose.bind(this)
   }
   
   componentDidMount() {
     fullHeight();
     setPasswordToggler();
-    
+    this.getDistricts()
     this.setState({rememberMe:localStorage.getItem('rememberMe') || 1})
     axios.interceptors.response.use(
       (response) => {
@@ -78,12 +79,15 @@ export class Login extends Component {
     window.FB.logout();
     console.log(data);
   }
-  async sendEmail() {
+  async requestForgetPassword() {
     const result = (await axios.post(
         process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword",
         { email: this.state.Email }
       )).data
-    this.showErrorFieldsIfNeeded(result)
+    if(this.showErrorFieldsIfNeeded(result))
+      return
+    else if(result.success)
+        Modal.success({content:'a link has submited for your email address to password reset'})
     console.log(result);
   }
   async ping() {
@@ -106,7 +110,7 @@ export class Login extends Component {
     for (const key in this.state) {
       const index = modelFields.findIndex(
         (mf) =>
-          mf.toLocaleLowerCase() == key.replace(" ", "").toLocaleLowerCase()
+          mf.toLocaleLowerCase() == key.replaceAll(" ", "").toLocaleLowerCase()
       );
       if (index < 0) continue;
       params[modelFields[index]] = this.state[key];
@@ -124,6 +128,7 @@ export class Login extends Component {
       "city",
       "zipCode",
       "phoneNumber",
+      "district"
     ];
     const result = (
       await axios.post(process.env.REACT_APP_API_ENDPOINT + "users/", this.getParamsFromInput(modelFields))
@@ -132,14 +137,20 @@ export class Login extends Component {
     if (!this.showErrorFieldsIfNeeded(result)) {
       if(result.success){
         return this.requestEmailConfirmation()
-        //return this.props.history.replace('/Dashboard')
+        //return this.props.history.replace(endPoints.dashboard)
       }
       this.setState({ errorMessage: undefined });
     }
   }
-  showErrorFieldsIfNeeded(result){
+  
+  showErrorFieldsIfNeeded(result,externalFields=undefined){
     if (result.fieldError) {
-      this.invalidateFields(result.fields);
+      var fields = []
+      if(externalFields){
+        fields = externalFields
+      }else
+        fields = result.fields
+      this.invalidateFields(fields);
       this.setState({ errorMessage: result.msg });
       return true
     }
@@ -171,7 +182,7 @@ export class Login extends Component {
     );
     for (const inputField of allInputFields) {
       let isFieldInvalid = formatedInvalidFields.includes(
-        inputField.getAttribute("name").replace(" ", "").toLowerCase()
+        inputField.getAttribute("name").replaceAll(" ", "").toLowerCase()
       );
       if (isFieldInvalid) {
         inputField.className = "form-control is-invalid";
@@ -192,7 +203,7 @@ export class Login extends Component {
         }
         if (response.data.authorize) {
           this.setState({ errorMessage: undefined });
-          return this.props.history.replace("/Dashboard");
+          return this.props.history.replace(endPoints.dashboard);
         } else if (response.data.attemptsRemain != undefined) {
           this.setState({
             errorMessage: `Invalid credentials only ${response.data.attemptsRemain} attempts remaining`,
@@ -204,17 +215,22 @@ export class Login extends Component {
         console.log(error);
       });
   }
-  renderInputFieldFragments(isLogin){
+  async getDistricts(){
+    const result = (await axios.get(process.env.REACT_APP_API_ENDPOINT + 'districts/')).data
+    this.setState({districts:result.list.map(district=>district.name)})
+    //console.log(this.state.districts)
+  }
+   renderInputFieldFragments(isLogin){
     var book = isLogin ? [["Email","Password"]] :[
       ["Email","Password","Confirm Password"],
       [ "First Name","Last Name","Phone Number","Address"],
-      [ "City","Zip Code"]
+      [ "City","Zip Code","District"]
     ]
     if(this.props.forgetPassword){
       book = [["Password","Confirm Password"]]
     }
     if(!isLogin)
-      setPasswordToggler()
+      setPasswordToggler() 
     return book.map((page,index)=>
         <div className="half p-4 py-md-5">
           {index == 0 && <div className="w-100">
@@ -223,6 +239,7 @@ export class Login extends Component {
           }
         <InputFieldFragments
         fields={page}
+        dropDownItems={this.state.districts}
         handleInputChange={this.handleInputChange} />
         {index == (book.length -1) && <BottomButton 
           errorMessage={this.state.errorMessage} 
@@ -260,7 +277,7 @@ export class Login extends Component {
               </label>
             </div>
             <div className="w-50 text-md-right">
-              <a onClick={this.sendEmail}>Forgot Password</a>
+              <a onClick={this.requestForgetPassword}>Forgot Password</a>
             </div>
           </div>
           <p className="w-100 text-center" style={{ color: "white" }}>
@@ -316,11 +333,15 @@ export class Login extends Component {
   }
   async submitEmailConfirmCode(){
     const code = this.state['Email Verification code']
+    console.log(this.state)
     this.setState({proccessEmailValidation:true})
     const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email,code:code})).data
-    console.log(result)
+    this.setState({proccessEmailValidation:false})
     if(result.confirmSuccess){
       this.onEmailConfimationClose()
+      this.props.history.replace(endPoints.dashboard)
+    }else{
+      this.showErrorFieldsIfNeeded(result,['EmailVerificationCode'])
     }
   }
   onEmailConfimationClose(){
@@ -340,6 +361,8 @@ export class Login extends Component {
         }}
       >
       <Modal visible={this.state.shouldShowEmailConfimation} confirmLoading={this.state.proccessEmailValidation}
+       closable={false}
+       maskClosable={false}
        onCancel={this.onEmailConfimationClose}
        onOk={this.submitEmailConfirmCode}>
         <p>We have sent you the code to your email address.Check it and type the code below</p>
