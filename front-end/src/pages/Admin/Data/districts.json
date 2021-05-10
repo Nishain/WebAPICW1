@@ -1,126 +1,151 @@
 [
     {
         "id":1,
-        "districtName":"Ampara"
+        "districtName":"Ampara",
+        "value":""
     }
     ,
     {
         "id":2,
-        "districtName":"Anuradhapura"
+        "districtName":"Anuradhapura",
+        "value":""
     }
     ,
     {
         "id":3,
-        "districtName":"Badulla"
+        "districtName":"Badulla",
+        "value":""
     }
     ,
     {
         "id":4,
-        "districtName":"Batticaloa"
+        "districtName":"Batticaloa",
+        "value":""
     }
     ,
     {
         "id":5,
-        "districtName":"Colombo"
+        "districtName":"Colombo",
+        "value":""
     }
     ,
     {
         "id":6,
-        "districtName":"Galle"
+        "districtName":"Galle",
+        "value":""
     }
     ,
     {
         "id":7,
-        "districtName":"Gampaha"
-    }
-    ,
-    {
-        "id":7,
-        "districtName":"Hambantota"
+        "districtName":"Gampaha",
+        "value":""
     }
     ,
     {
         "id":8,
-        "districtName":"Jaffna"
+        "districtName":"Hambantota",
+        "value":""
     }
     ,
     {
         "id":9,
-        "districtName":"Kalutara"
+        "districtName":"Jaffna",
+        "value":""
     }
     ,
     {
         "id":10,
-        "districtName":"Kandy"
+        "districtName":"Kalutara",
+        "value":""
     }
     ,
     {
         "id":11,
-        "districtName":"Kegalle"
+        "districtName":"Kandy",
+        "value":""
+    }
+    ,
+    {
+        "id":11,
+        "districtName":"Kegalle",
+        "value":""
     }
     ,
     {
         "id":12,
-        "districtName":"Kilinochchi"
+        "districtName":"Kilinochchi",
+        "value":""
     }
     ,
     {
         "id":13,
-        "districtName":"Kurunegala"
+        "districtName":"Kurunegala",
+        "value":""
     }
     ,
     {
         "id":14,
-        "districtName":"Mannar"
+        "districtName":"Mannar",
+        "value":""
     }
     ,
     {
         "id":15,
-        "districtName":"Matale"
+        "districtName":"Matale",
+        "value":""
     }
     ,
     {
         "id":16,
-        "districtName":"Matara"
+        "districtName":"Matara",
+        "value":""
     }
     ,
     {
         "id":17,
-        "districtName":"Monaragala"
+        "districtName":"Monaragala",
+        "value":""
     }
     ,
     {
         "id":18,
-        "districtName":"Mullaitivu"
+        "districtName":"Mullaitivu",
+        "value":""
     }
     ,
     {
         "id":19,
-        "districtName":"Nuwara Eliya"
+        "districtName":"Nuwara Eliya",
+        "value":""
     }
     ,
     {
         "id":20,
-        "districtName":"Polonnaruwa"
+        "districtName":"Polonnaruwa",
+        "value":""
     }
     ,
     {
         "id":21,
-        "districtName":"Puttalam"
+        "districtName":"Puttalam",
+        "value":""
     }
     ,
     {
         "id":22,
-        "districtName":"Ratnapura"
+        "districtName":"Ratnapura",
+        "value":""
     }
     ,
     {
         "id":23,
-        "districtName":"Trincomalee"
+        "districtName":"Trincomalee",
+        "value":""
     }
     ,
     {
         "id":24,
-        "districtName":"Vavuniya"
+        "districtName":"Vavuniya",
+        "value":""
     }
 ]
