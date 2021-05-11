@@ -5,6 +5,7 @@ import icon from '../common/photo.png'
 export default class TopNavigation extends Component {
   constructor(){
     super()
+    danjdnkand
     this.signOut = this.signOut.bind(this)
   }
   signOut(){
