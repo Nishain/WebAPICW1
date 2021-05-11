@@ -20,17 +20,18 @@ export class Dashboard extends Component {
     this.setState({ uploadedFiles: uploadedFiles });
   };
   removeFile = (file) => {
-      const deleteIndex = this.state.uploadedFiles.indexOf(file)
-      this.state.uploadedFiles.splice(deleteIndex,1)
-      this.setState({uploadedFiles:this.state.uploadedFiles})
-  }
-  async signOut(){
-    await axios.get(process.env.REACT_APP_API_ENDPOINT+'auth/signout/')
-    cookie.remove('jwt')
-    this.props.history.replace('/')
+    const deleteIndex = this.state.uploadedFiles.indexOf(file)
+    this.state.uploadedFiles.splice(deleteIndex,1)
+    this.setState({uploadedFiles:this.state.uploadedFiles})
+}
+async signOut(){
+  await axios.get(process.env.REACT_APP_API_ENDPOINT+'auth/signout/')
+  cookie.remove('jwt')
+  this.props.history.replace('/')
   }
   render() {
     return (
+    
       <section>
         <TopNavigation items={2} signOut={this.signOut}/>
         <div className="container row">

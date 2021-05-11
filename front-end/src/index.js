@@ -5,6 +5,7 @@ import "./index.css";
 import App from "./App";
 import { Login } from "./pages/Login/Login";
 import { Dashboard as Customer } from "./pages/CustomerDashboard/Dashboard";
+import Home from "./pages/Home/Home";
 import ViewProduct from "./pages/ProductView/ProductView";
 import adminLogin from "./pages/Admin/Login/adminLogin";
 import Layout from "./pages/Admin/Shared/Layout/Layout";
@@ -32,6 +33,7 @@ ReactDOM.render(
       <Route exact path="/forgetPassword/:code" render={(props)=><Login {...props} forgetPassword={true} />} />
       <Route exact path="/ProductView" component={ProductView} /> 
       <Route exact path={endPoints.dashboard} component={Customer} />
+      <Route exact path="/home" component={Home} />
       <Route exact path="/AdminLogin" component={adminLogin} />
       {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
     </Switch>
