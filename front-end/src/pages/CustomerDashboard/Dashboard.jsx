@@ -65,7 +65,7 @@ async signOut(){
                     >
                     Upload photos
                     </button>
-                </div>    
+                </div> 
                 <div className="card-body col">
                     <ul className="list-group list-group-flush">
                         {this.state.uploadedFiles.slice(0,3).map(file=>
