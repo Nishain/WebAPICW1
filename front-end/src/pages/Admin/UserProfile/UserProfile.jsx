@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Table, Input, Button, Space } from "antd";
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from "@ant-design/icons";
+import axios from 'axios'
 import "./UserProfile.scss"
 const data = [
   {
@@ -30,8 +31,25 @@ const data = [
   },
 ];
 export default function UserProfile() {   
-  const [searchText, setsearchText] = useState("");
-  const [searchedColumn, setsearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [userData, setUserData] = useState([]);
+  const fetchApi = async () => {
+    const result = await axios.get(
+      "http://localhost:5000/users"
+     
+    )
+    
+    setUserData(result && result.data ? result.data.users : [])
+  }
+  useEffect( () => {
+    fetchApi()
+    
+  }, []);
+  const supendUser =(id)=>{
+    debugger
+
+  }
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -74,8 +92,8 @@ export default function UserProfile() {
             size="small"
             onClick={() => {
               confirm({ closeDropdown: false });
-              setsearchText(selectedKeys[0]);
-              setsearchedColumn(dataIndex);
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
             }}
           >
             Filter
@@ -113,34 +131,50 @@ export default function UserProfile() {
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setsearchText(selectedKeys[0]);
-    setsearchedColumn(dataIndex);
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
   };
 
   const handleReset = (clearFilters) => {
     clearFilters();
-    setsearchText("");
+    setSearchText("");
   };
   const columns = [
     {
       title: "Name",
-      dataIndex: "name",
-      key: "name",
-      width: "30%",
-      ...getColumnSearchProps("name"),
-    },
-    {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
+      dataIndex: "firstName",
+      key: "firstName",
       width: "20%",
-      ...getColumnSearchProps("age"),
+      ...getColumnSearchProps("firstName"),
     },
     {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-      ...getColumnSearchProps("address"),
+      title: "Last Name",
+      dataIndex: "lastName",
+      key: "lastName",
+      width: "20%",
+      ...getColumnSearchProps("lastName"),
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: "20%",
+      ...getColumnSearchProps("email"),
+    },
+    {
+      title: "Phone Number",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      width: "20%",
+      ...getColumnSearchProps("phoneNumber"),
+    },
+    ,
+    {
+      title: "",
+      dataIndex: '_id',
+    key: '_id',
+    width: "20%",
+    render: (value,d) => <div><Button type="danger" onClick={()=>supendUser(d._id)}>Suspend</Button><Button type="primary" onClick={()=>supendUser(d._id)}>Suspend</Button></div>,
     },
   ];
   return (
@@ -148,7 +182,8 @@ export default function UserProfile() {
       <div className="panel panel-default">
         <div className="panel-heading">User Profile</div>
         <div className="panel-body">
-          <Table columns={columns} dataSource={data} />;
+          {userData.length && <Table columns={columns} dataSource={userData} />}
+          
         </div>
       </div>
     </div>

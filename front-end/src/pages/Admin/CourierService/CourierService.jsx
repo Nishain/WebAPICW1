@@ -51,9 +51,9 @@ const addCourierService = async () =>{
       </div>
       <div className="row">
         {values.length > 0 &&
-          values.map((data) => (
+          values.map((data,i) => (
             <div className="col-md-4">
-              <CustomTextBox obj={data} func={onChangeInputHandler} />
+              <CustomTextBox obj={data} func={onChangeInputHandler} keyvalue={i} />
             </div>
           ))}
           <div className="col-12">

@@ -13,6 +13,13 @@ router.get('/category',async (req,res)=>{
     const categoryList = await Category.find()
     res.send(categoryList)
 })
+router.get('/category/:id',async (req,res)=>{
+    const categoryitem = await Category.findById(req.params.id)
+    if(categoryitem)
+        return res.send(categoryitem)
+    else
+        return Helper.notFound(res)
+})
 router.post('/category',async (req,res)=>{
     const newCategory = mapRequestBodyToSchema(req)
     try {
@@ -21,5 +28,10 @@ router.post('/category',async (req,res)=>{
     } catch (error) {
         return Helper.badRequest(res,error)
     }  
+})
+router.put('/:id',async (req,res)=>{
+    const category = await Category.findById(req.params.id)
+    if(category)
+        res.send()
 })
 module.exports = router
