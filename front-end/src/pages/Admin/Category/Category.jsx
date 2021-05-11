@@ -1,11 +1,12 @@
 import React, {  useState } from "react";
-import { Input } from 'antd';
+import { Input,Button } from 'antd';
 import{CategoryValues,CategoryTypes} from "./extranalData"
 import axios from 'axios'
 
 
 export default function Category() {
   const [category, setCategory] = useState(CategoryValues)
+  const [loading, setLoading] = useState(false)
   const onChangeHandler = (type) => (e) => {
    
     setCategory({
@@ -14,15 +15,24 @@ export default function Category() {
     });
   
   }
+
   const  addCategory = async ()=>
   {
     
-    
-    const result = (await axios.post(
+    setLoading(true)
+    const result = await axios.post(
       "http://localhost:5000/Admin/category",category
       
-    )).data
-    // this.setState({ articleId: response.data.id });
+    )
+    if(result && result.data)
+    {
+      setLoading(false)
+    }
+    else{
+      setLoading(false)
+    }
+    
+    
   }
   
   return (
@@ -45,13 +55,8 @@ export default function Category() {
                         CategoryTypes.price
                       )} />
               </div>
-              <button
-                className="btn btn-primary"
-                type="button"
-                 onClick={addCategory}
-              >
-                Add
-              </button>
+
+              <Button type="primary" onClick={addCategory} loading={loading}>Primary Button</Button>
             </div>
           </div>
         </div>

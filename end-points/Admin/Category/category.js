@@ -16,7 +16,8 @@ router.get('/category',async (req,res)=>{
 router.post('/category',async (req,res)=>{
     const newCategory = mapRequestBodyToSchema(req)
     try {
-        res.send(await newCategory.save())
+        await newCategory.save()
+        res.send({success:true,message:'email successfully sent!'})
     } catch (error) {
         return Helper.badRequest(res,error)
     }  
