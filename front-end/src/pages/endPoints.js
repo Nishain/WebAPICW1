@@ -9,6 +9,7 @@ export const Admin = {
 export default class EndPoints{
     static dashboard = '/Dashboard'
     static admin = Admin
+    static adminLogin = '/AdminLogin'
     static productsView = '/ProductView'
     static forgetPassword = "/forgetPassword/:code"
 }

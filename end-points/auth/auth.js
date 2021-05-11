@@ -2,8 +2,93 @@ const router = require('express').Router()
 const User = require('../../models/User')
 const BlockedIP = require('../../models/BlockedIP')
 const constants = require('../../constants')
+const nodeMailer = require('nodemailer')
 const jwt = require('jsonwebtoken')
-const helper = require('../helper')
+const Helper = require('../Helper')
+const RandomCodeGenerator = require('randomatic');
+const bycrypt = require('bcrypt')
+const urlSafeBase64 = require('url-safe-base64')
+const transporter = nodeMailer.createTransport({
+    service:'Gmail',
+    auth:{
+        user:process.env.email,
+        pass:process.env.password
+    },tls: {
+        // do not fail on invalid certs
+        rejectUnauthorized: false
+    }
+})
+var emailOptions = {
+    from:process.env.email,
+    to:''
+}
+async function sendCodeToEmail(role,req,res){
+    console.log({
+        user:process.env.email,
+        password:process.env.password
+    })
+    if(typeof req.body.email != 'string')
+        return Helper.fieldError(res,'Please provide a valid email address',['email'])
+    emailOptions.to = req.body.email
+    
+    const targetUser = await User.findOne({email:req.body.email})
+    if(!targetUser)
+        return Helper.fieldError(res,'email does not exist',['email'])
+    const code = (role == 'forgetPassword') ? urlSafeBase64.encode(await bycrypt.hash(req.body.email + RandomCodeGenerator('Aa0',10),1)): RandomCodeGenerator('A0',10)
+    emailOptions = (role == 'forgetPassword') ? constants.designEmailContent(code,emailOptions) 
+        : constants.designEmailConfimationBody(code,emailOptions)
+    
+    transporter.sendMail(emailOptions,async (err,data)=>{
+        if(err){
+            res.send({success:false,message:err})
+        }else{
+            const paramBody = (role == 'forgetPassword') ? {forgetPasswordCode:code} : {emailConfirmationCode:code}
+            console.log(paramBody)
+            await targetUser.set(paramBody).save()
+            res.send({success:true,message:'email successfully sent!'})
+        }
+    })
+}
+router.post('/forgetPassword',async (req,res)=>{
+    sendCodeToEmail('forgetPassword',req,res)
+})
+router.post('/verify',async (req,res)=>{
+    if(typeof req.body.code == 'string'){
+        if(!Helper.validateFields(req,res,{email:'String',code:'String'}))
+            return
+        const code = req.body.code 
+        const email = req.body.email   
+        const target = await User.findOne({email:email,emailConfirmationCode:code})
+        if(!target)
+            res.send({fieldError:true,message:'the user does not exist'})
+        else{
+            await target.set({isEmailConfirmed:true,emailConfirmationCode:undefined}).save()
+            Helper.sendJWTAuthenticationCookie(res,email).send({confirmSuccess:true})    
+        }
+    }else
+        sendCodeToEmail('emailConfirm',req,res)
+})
+
+router.put('/forgetPassword/:code',async (req,res)=>{
+     const targetUser = await User.findOne({forgetPasswordCode:req.params.code})
+     if(req.body.editPassword){
+        if(!targetUser) 
+            return res.send({forgetPasswordPing : true, userExist:false})
+        if(!Helper.validateFields(req,res,{password:'String',confirmPassword:'String'}))
+            return
+        const password = req.body.password
+        const confirmPassword = req.body.confirmPassword
+        if(password != confirmPassword)
+            return Helper.fieldError(res,'password and confirm password should be same',['password','confirmPassword'])
+        await targetUser.set({forgetPasswordCode:undefined,password:password}).save()   
+        res.send({passwordChanged:true})
+     }else{
+         if(targetUser)
+            res.send({forgetPasswordPing : true, userExist:true})
+         else
+            res.send({forgetPasswordPing : true, userExist:false})   
+     }
+})
 
 
 router.post('/',async (req,res)=>{
@@ -19,11 +104,13 @@ async function authenticate(thirdParty,req,res){
     }else{
         let email = req.body["email"]
         let password = req.body["password"]
-        if (!helper.validateFields(req,res,{email:'String',password:'String'}))
+        if (!Helper.validateFields(req,res,{email:'String',password:'String'}))
             return
         user = await User.findOne({email:email,password:password})
     }
     if(user){
+        if(!user.isActive)
+            return Helper.reportAccountDeactivated(res,true)
         const blockedIP = BlockedIP.findOne({ip:req.ip})
         if(blockedIP){
             await blockedIP.deleteOne()
@@ -32,7 +119,7 @@ async function authenticate(thirdParty,req,res){
             return res.send({requiredToConfirm:true})
         }
         await user.set({isLogged:true}).save()
-        helper.sendJWTAuthenticationCookie(res,user.email)
+        Helper.sendJWTAuthenticationCookie(res,user.email)
         .send({authorize:true,message:'you are authenticated'})
     }
     else{
@@ -62,7 +149,7 @@ router.get('/signout',async (req,res)=>{
     try{
         data = jwt.verify(req.cookies["jwt"].token, process.env.jwtSecret)
     }catch(error){
-        return helper.invalidToken(res,'not valid token to sign out')
+        return Helper.invalidToken(res,'not valid token to sign out')
     }
     
     const loggedUser = await User.findOne({email:data.email})

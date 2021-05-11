@@ -120,5 +120,8 @@ class Helper {
     badRequest(res,msg){
         return res.status(400).send({error:true,msg:msg})
     }
+    reportAccountDeactivated(res,duringLogin = false){
+        res.status(401).send({accountInActive:true,onlogin:duringLogin})
+    }
 }
 module.exports = new Helper()

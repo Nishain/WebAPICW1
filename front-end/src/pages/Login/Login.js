@@ -48,6 +48,11 @@ export class Login extends Component {
   }
   
   componentDidMount() {
+    if(this.props.redirect){
+      if(this.props.errorTitle)
+        return
+      return this.props.history.replace('/')
+    }
     fullHeight();
     setPasswordToggler();
     this.getDistricts()
@@ -95,7 +100,7 @@ export class Login extends Component {
   }
   async requestForgetPassword() {
     const result = (await axios.post(
-        process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword",
+        process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword",
         { email: this.state.Email }
       )).data
     if(this.showErrorFieldsIfNeeded(result))
@@ -107,7 +112,7 @@ export class Login extends Component {
   async ping() {
     await axios.get(process.env.REACT_APP_API_ENDPOINT);
     if(this.props.forgetPassword){
-      const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword/" + this.props.match.params.code)).data
+      const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword/" + this.props.match.params.code)).data
       if(result.forgetPasswordPing && !result.userExist){
         this.setState({isForgetCodeInvalid:true})
       }
@@ -176,7 +181,7 @@ export class Login extends Component {
   async forgetPassword(){
     var params = this.getParamsFromInput(['password','confirmPassword'])
     params.editPassword = true
-    const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword/" + this.props.match.params.code,
+    const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword/" + this.props.match.params.code,
     params)).data
     if(this.showErrorFieldsIfNeeded(result))
       return
@@ -348,7 +353,7 @@ export class Login extends Component {
     );
   }
   async requestEmailConfirmation(){
-    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email})).data
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/verify/',{email:this.state.Email})).data
     if(this.showErrorFieldsIfNeeded(result))
       return
     console.log(result)  
@@ -360,7 +365,7 @@ export class Login extends Component {
     const code = this.state['Email Verification code']
     console.log(this.state)
     this.setState({proccessEmailValidation:true})
-    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email,code:code})).data
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/verify/',{email:this.state.Email,code:code})).data
     this.setState({proccessEmailValidation:false})
     if(result.confirmSuccess){
       this.onEmailConfimationClose()

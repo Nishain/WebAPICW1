@@ -8,10 +8,11 @@ const app = express()
 app.use(cors({credentials:true,origin:constants.clientURL}))
 app.use(cookieParser())
 app.use(express.json())
-app.use('/districts/',require('./end-points/districts/districtRoute'))
+
 app.use(require('./middleware/IPCheck'))
 app.use('/auth/',require('./end-points/auth/auth'))
 app.use(require('./middleware/CheckCookie'))
+app.use('/districts/',require('./end-points/districts/districtRoute'))
 app.get('/',(req,res)=>{
     return res.send({pingSuccess:true})
 })
