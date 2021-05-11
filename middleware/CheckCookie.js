@@ -3,7 +3,7 @@ const helper = require('../end-points/helper');
 const User = require('../models/User')
 module.exports = async function checkCookie(req, res, next) {
   console.log(req.path)
-  const exceptions = ['/users/','/auth/','/users/forgetPassword']  
+  const exceptions = ['/users/','/users/forgetPassword']  
   if(exceptions.findIndex(p=>req.path.startsWith(p)) > -1)
     return next()
    

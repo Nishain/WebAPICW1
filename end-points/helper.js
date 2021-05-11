@@ -1,5 +1,6 @@
 const Mongoose = require('mongoose')
 const constants = require('../constants')
+const jwt = require('jsonwebtoken')
 class Helper {
     validateFields(req,res,structure){
         let emptyFields = this.checkIfEmpty(req,Object.keys(structure))
@@ -70,6 +71,14 @@ class Helper {
                 return true    
         }else
             return false
+    }
+    sendJWTAuthenticationCookie(res,email){
+        res.cookie('jwt',{
+            token:jwt.sign({email:email},
+            process.env.jwtSecret,//secret
+            {expiresIn:'1h'})
+        })
+        return res
     }
     checkFormat(req,structure){
         var invalidFields = []

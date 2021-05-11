@@ -7,11 +7,22 @@ const helper = require('../helper')
 
 
 router.post('/',async (req,res)=>{
-    let email = req.body["email"]
-    let password = req.body["password"]
-    if (!helper.validateFields(req,res,{email:'String',password:'String'}))
-        return
-    const user = await User.findOne({email:email,password:password})
+    authenticate(false,req,res)
+})
+async function authenticate(thirdParty,req,res){
+    var user = false
+    if(thirdParty){
+        if(typeof req.body.linkID != 'string')
+            return res.status(400).send({fieldError:true,message:'require provider user ID'})
+        const linkID = req.body.linkID 
+        user = await User.findOne({quickSignInID : linkID})
+    }else{
+        let email = req.body["email"]
+        let password = req.body["password"]
+        if (!helper.validateFields(req,res,{email:'String',password:'String'}))
+            return
+        user = await User.findOne({email:email,password:password})
+    }
     if(user){
         const blockedIP = BlockedIP.findOne({ip:req.ip})
         if(blockedIP){
@@ -21,13 +32,12 @@ router.post('/',async (req,res)=>{
             return res.send({requiredToConfirm:true})
         }
         await user.set({isLogged:true}).save()
-        res.cookie('jwt',{
-            token:jwt.sign({email:email},
-            process.env.jwtSecret,//secret
-            {expiresIn:'1h'})
-        }).send({authorize:true,message:'you are authenticated'})
+        helper.sendJWTAuthenticationCookie(res,email)
+        .send({authorize:true,message:'you are authenticated'})
     }
     else{
+        if(thirdParty)
+            return res.send({requireRegistration : true})
         const blockedIP = await BlockedIP.findOne({ip:req.ip})
         var params = {lastDate:Date.now()}
         if(blockedIP){
@@ -43,8 +53,10 @@ router.post('/',async (req,res)=>{
         }
         res.send({authorize:false,message:'unauthorized',attemptsRemain: 3 - (params.attempts || 1)})    
     }
+}
+router.post('/link',async (req,res)=>{
+    authenticate(true,req,res)
 })
-
 router.get('/signout',async (req,res)=>{
     let data
     try{

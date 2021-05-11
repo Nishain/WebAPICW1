@@ -62,7 +62,7 @@ router.post('/verify',async (req,res)=>{
             res.send({fieldError:true,message:'the user does not exist'})
         else{
             await target.set({isEmailConfirmed:true,emailConfirmationCode:undefined}).save()
-            res.send({confirmSuccess:true})    
+            helper.sendJWTAuthenticationCookie(res,email).send({confirmSuccess:true})    
         }
     }else
         sendCodeToEmail('emailConfirm',req,res)
@@ -119,13 +119,18 @@ router.put('/:id',async (req,res)=>{
 router.post('/',async (req,res)=>{
     var mapping = {}
     var schemaPaths = User.schema.requiredPaths()
+    const isProviderEnabledAccount = typeof req.body.isProviderEnabledAccount == 'boolean' && req.body.isProviderEnabledAccount
+    if(isProviderEnabledAccount){
+        schemaPaths.push('quickSignInID')
+    }else
+        schemaPaths.push('password')
     for(const path of schemaPaths){
         let value = User.schema.paths[path]
         mapping[path] = value.instance
     }
     if(!Helper.validateFields(req,res,mapping))
         return
-    if(req.body.password != req.body.confirmPassword){
+    if(!isProviderEnabledAccount && req.body.password != req.body.confirmPassword){
         return Helper.fieldError(res,"password and confirm password mismatch",['password','confirmPassword'])
     }
     if(await User.findOne({email:req.body.email}))
