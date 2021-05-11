@@ -32,7 +32,7 @@ async function authenticate(thirdParty,req,res){
             return res.send({requiredToConfirm:true})
         }
         await user.set({isLogged:true}).save()
-        helper.sendJWTAuthenticationCookie(res,email)
+        helper.sendJWTAuthenticationCookie(res,user.email)
         .send({authorize:true,message:'you are authenticated'})
     }
     else{

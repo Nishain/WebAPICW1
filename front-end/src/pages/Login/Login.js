@@ -207,12 +207,14 @@ export class Login extends Component {
       } else inputField.className = "form-control";
     }
   }
- 
-  login() {
+  navigateToDashbaord() {
+    this.props.history.replace(endPoints.dashboard);
+  }
+   login() {
     let modelPaths = ["email","password"]
     axios
       .post(process.env.REACT_APP_API_ENDPOINT + "auth/",this.getParamsFromInput(modelPaths))
-      .then((response) => {
+      .then((response)  => {
         console.log(response.data); 
         if(response.data.requiredToConfirm){
           this.setState({ errorMessage: undefined });
@@ -221,7 +223,7 @@ export class Login extends Component {
         }
         if (response.data.authorize) {
           this.setState({ errorMessage: undefined });
-          return this.props.history.replace(endPoints.dashboard);
+          this.navigateToDashbaord()
         } else if (response.data.attemptsRemain != undefined) {
           this.setState({
             errorMessage: `Invalid credentials only ${response.data.attemptsRemain} attempts remaining`,
@@ -363,7 +365,7 @@ export class Login extends Component {
     this.setState({proccessEmailValidation:false})
     if(result.confirmSuccess){
       this.onEmailConfimationClose()
-      this.props.history.replace(endPoints.dashboard)
+      this.navigateToDashbaord()
     }else{
       this.showErrorFieldsIfNeeded(result,['EmailVerificationCode'])
     }
@@ -406,13 +408,12 @@ export class Login extends Component {
             <div className="row justify-content-center">
               <div className={this.state.isLogin ? "col-md-12 col-lg-7" : "col-md-12 col-lg-10"} >
                 <div className="login-wrap">
-                  {this.props.isBlocked || (this.props.forgetPassword && this.state.isForgetCodeInvalid) ? (
+                  {this.props.errorTitle || (this.props.forgetPassword && this.state.isForgetCodeInvalid) ? (
                     <div className="card text-center">
                       <div className="card-body">
-                        <h5 className="card-title">{this.props.isBlocked ? 'Your IP is tempolary blocked':'Invalid Forget password code'}</h5>
+                        <h5 className="card-title">{this.props.forgetPassword ? 'Invalid Forget password code':this.props.errorTitle}</h5>
                         <p className="card-text">
-                          { (this.props.isBlocked && <>This is the result of attempting to fail to login
-                          within 3 attempts</>) || <>Invalid forget password code please check your email address</>
+                          { (this.props.errorMessage && <>{this.props.errorMessage}</>) || <>Invalid forget password code please check your email address</>
                           }
                         </p>
                       </div>

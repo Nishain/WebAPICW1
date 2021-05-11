@@ -8,15 +8,18 @@ module.exports = async function checkCookie(req, res, next) {
     return next()
    
   if (!req.cookies.jwt) {
+        console.log(`no token ${req.path}`)
         return helper.invalidToken(res,'no token found')
   } else {
     try {
       const data = jwt.verify(req.cookies["jwt"].token, process.env.jwtSecret);
-      const targetUser = User.findOne({email:data.email,isLogged:true})
+      const targetUser = await User.findOne({email:data.email,isLogged:true})
       if(!targetUser) 
         return helper.invalidToken(res,'user in token is not valid logged user')
-      console.log("token email "+data.email);
+      if(!targetUser.isActive)
+        return res.status(401).send({accountInActive:true})
     } catch (error) {
+        console.log(`no token ${req.path}`)
         return helper.invalidToken(res,'invalid token')
     }
   }
