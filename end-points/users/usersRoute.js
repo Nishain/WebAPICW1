@@ -41,7 +41,7 @@ router.post('/',async (req,res)=>{
         schemaPaths.push('password')
     for(const path of schemaPaths){
         let value = User.schema.paths[path]
-        mapping[path] = value.instance
+        mapping[path] = value.instance //data type
     }
     if(!Helper.validateFields(req,res,mapping))
         return

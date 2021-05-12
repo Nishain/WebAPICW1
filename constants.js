@@ -3,10 +3,15 @@ class Constants {
     clientURL = 'http://localhost:3000'
     url = `http://localhost:${process.env.PORT}/`
     emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
-    regexMapping = {
+    phoneNumberRegex = /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$/
+    regexMapping = { //all regex field keys must be simple case....
         email : {
             regex:this.emailRegex,
             message:'Enter a valid email'
+        },
+        phonenumber : {
+            regex : this.phoneNumberRegex,
+            message : 'Enter a valid phone number'
         }
     }
     IPBlockedMsg = 'Your IP is being tempolary blocked'

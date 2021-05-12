@@ -61,7 +61,7 @@ export class Login extends Component {
     this.getDistricts()
     this.setState({rememberMe:localStorage.getItem('rememberMe') || 1})
     
-    this.ping();
+    this.checkValidForgetPasswordGateway();
   }
 
   handleGoogleSignIn =  (googleData) => {
@@ -85,15 +85,7 @@ export class Login extends Component {
     const userID = data.userID
     this.thirdPartySignIn(userID,data.email,'facebook',data.picture.data.url)
   }
-  async thirdPartySignIn(userID,email,provider,profileImage){
-    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + "auth/link",{linkID:userID})).data
-    const thirdParty = {
-      email : email,
-      provider : provider,
-      userID : userID
-    }
-    this.handleAuthentication(result,true,thirdParty)
-  }
+  
   async requestForgetPassword() {
     const result = (await axios.post(
         process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword",
@@ -105,7 +97,7 @@ export class Login extends Component {
         Modal.success({content:'a link has submited for your email address to password reset'})
     console.log(result);
   }
-  async ping() {
+  async checkValidForgetPasswordGateway() {
     await axios.get(process.env.REACT_APP_API_ENDPOINT);
     if(this.props.forgetPassword){
       const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword/" + this.props.match.params.code)).data
@@ -145,12 +137,12 @@ export class Login extends Component {
       "district"
     ];
     var postBody = this.getParamsFromInput(modelFields)
-    postBody['password'] = await bycrypt.hash(postBody['password'],process.env.REACT_APP_PASSWORD_SALT)
-    postBody['confirmPassword'] = await bycrypt.hash(postBody['confirmPassword'],process.env.REACT_APP_PASSWORD_SALT)
-    
     if(this.state.thirdPartySignUp){
       postBody['isProviderEnabledAccount'] = true
-      postBody['quickSignInID'] = this.state.thirdPartySignUp.userID
+      postBody['quickSignInID'] = await bycrypt.hash(this.state.thirdPartySignUp.userID,process.env.REACT_APP_PASSWORD_SALT)
+    }else{
+      postBody['password'] = await bycrypt.hash(postBody['password'],process.env.REACT_APP_PASSWORD_SALT)
+    postBody['confirmPassword'] = await bycrypt.hash(postBody['confirmPassword'],process.env.REACT_APP_PASSWORD_SALT)
     }
     const result = (
       await axios.post(process.env.REACT_APP_API_ENDPOINT + "users/", postBody)
@@ -227,9 +219,9 @@ export class Login extends Component {
     if (data.authorize) {
       this.setState({ errorMessage: undefined });
       if(isThirdPartyAuthentication)
-        sessionStorage.setItem('profileImage',profileImage) //setting the profile image from the provider
+        sessionStorage.setItem('profileImage',thirdParyInfo.profileImage) //setting the profile image from the provider
       return this.navigateToDashbaord()
-    } else if(isThirdPartyAuthentication && result.requireRegistration){
+    } else if(isThirdPartyAuthentication && data.requireRegistration){
       return this.setState({isLogin:false,thirdPartySignUp:thirdParyInfo})
     }
     else if (data.attemptsRemain != undefined) {
@@ -240,17 +232,41 @@ export class Login extends Component {
     if(!isThirdPartyAuthentication)
       this.showErrorFieldsIfNeeded(data)
   }
-   async login() {
+  async getAuthSaltAndHash(valueToHash,email,isThirdPartyProviderAuthentication,thirdPartyAuthInfo=undefined){
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/salt/',
+    {email:email,thirdPartyProvider:isThirdPartyProviderAuthentication})).data
+    const authenticationResult = this.handleAuthentication(result,isThirdPartyProviderAuthentication,thirdPartyAuthInfo)
+    if(!authenticationResult || !authenticationResult.salt)
+      return {hashedValueAvailable:false}
+    const firstHash = await bycrypt.hash(valueToHash,process.env.REACT_APP_PASSWORD_SALT)  
+    const secondHash = await bycrypt.hash(firstHash,authenticationResult.salt)  
+    return {
+      hashedValueAvailable : true,
+      firstHash : firstHash,
+      finalHash : secondHash
+    }  
+  }
+   thirdPartySignIn = async(userID,email,provider,profileImage)=>{
+    const thirdParty = {
+      email : email,
+      provider : provider,
+      userID : userID,
+      profileImage : profileImage
+    }
+    const hashedData = await this.getAuthSaltAndHash(userID,email,true,thirdParty)
+    if(!hashedData.hashedValueAvailable)
+      return
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + "auth/link",
+      {linkID:hashedData.firstHash,reHashedLinkID:hashedData.finalHash})).data  
+    this.handleAuthentication(result,true,thirdParty)
+  }
+  login = async () => {
     let modelPaths = ["email","password"]
     var paramBody = this.getParamsFromInput(modelPaths)
-    const saltResult = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/salt/',{email:paramBody.email})).data
-    const authenticationResult = this.handleAuthentication(saltResult,false)
-    if(!authenticationResult.salt)
-      return //the authentication is handled in different way
-    const saltFromServer = authenticationResult.salt
-    const firstHash = await bycrypt.hash(paramBody.password,process.env.REACT_APP_PASSWORD_SALT)  
-    const secondHash = await bycrypt.hash(firstHash,saltFromServer)
-    paramBody.password = secondHash
+    const hashData = await this.getAuthSaltAndHash(paramBody.password,paramBody.email,false)
+    if(!hashData.hashedValueAvailable)
+      return
+    paramBody.password = hashData.finalHash
     axios
       .post(process.env.REACT_APP_API_ENDPOINT + "auth/",paramBody)
       .then((response)  => {

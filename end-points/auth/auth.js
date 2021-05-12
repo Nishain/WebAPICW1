@@ -143,6 +143,7 @@ async function authenticate(thirdParty, req, res) {
         .status(400)
         .send({ fieldError: true, message: "require provider user ID" });
     const linkID = req.body.linkID;
+    console.log('primary linkID - '+linkID)
     user = await User.findOne({ quickSignInID: linkID });
   } else {
     let email = req.body["email"];
@@ -152,16 +153,20 @@ async function authenticate(thirdParty, req, res) {
       return;
     user = await User.findOne({ email: email });
   }
-  if (thirdParty) {
-    let linkID = req.body.linkID;
-    passwordMatch =
-      linkID == (await bycrypt.hash(user.quickSignInID, user.hashSalt));
-  } else {
-    let password = req.body.password;
-    passwordMatch =
-      password == (await bycrypt.hash(user.password, user.hashSalt));
-  }
-  if (user && passwordMatch) {
+  if(user){
+    if (thirdParty) {
+        let rehashedLinkID = req.body.reHashedLinkID;
+        console.log('secondary hashed linkID - '+rehashedLinkID)
+        passwordMatch =
+        rehashedLinkID == (await bycrypt.hash(user.quickSignInID, user.hashSalt));
+    } else {
+        let password = req.body.password;
+        passwordMatch =
+        password == (await bycrypt.hash(user.password, user.hashSalt));
+    }
+    }
+  if (passwordMatch) {
+      
     if (!user.isActive) return Helper.reportAccountDeactivated(res, true);
     const blockedIP = BlockedIP.findOne({ ip: req.ip });
     if (blockedIP) {
@@ -176,13 +181,16 @@ async function authenticate(thirdParty, req, res) {
       message: "you are authenticated",
       userName: user.firstName,
     });
-  } else {
+  } 
+  else{
     await handleAuthenticationFailure(thirdParty,res);
   }
 }
 async function handleAuthenticationFailure(thirdParty, res) {
-  if (thirdParty)
+  if (thirdParty){
+   console.log('registration required')   
    return res.send({ requireRegistration: true });
+  }
   const blockedIP = await BlockedIP.findOne({ ip: req.ip });
   var params = { lastDate: Date.now() };
   if (blockedIP) {
