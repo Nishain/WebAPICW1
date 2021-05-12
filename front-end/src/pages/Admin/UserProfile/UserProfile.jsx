@@ -48,7 +48,7 @@ export default function UserProfile() {
   }, []);
   const supendUser = async(id,status)=>{
     debugger
-    const url=`http://localhost:5000/Admin/category/${id}`
+    const url=`http://localhost:5000/users/${id}`
     const result = await axios.put(
       url,
     

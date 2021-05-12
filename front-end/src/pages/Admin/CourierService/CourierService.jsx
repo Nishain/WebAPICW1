@@ -7,7 +7,7 @@ import CourierServiceData from "../Data/districts.json";
 export default function CourierService() {
   const [values, setValues] = useState(CourierServiceData);
   const [valueCourierService, setCourierService] = useState("");
-
+  
   const onChangeInputHandler = (id, price) => {
     values.map((x, i) => {
       if (x.id == id) {
