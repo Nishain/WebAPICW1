@@ -19,7 +19,7 @@ export default function Category() {
     debugger
     setCategorySelect( e.target.value,
     );
-    getFrechApi(categorySelect)
+    getFrechApi( e.target.value)
   };
   const onChangeEditHandler = (type) => (e) => {
     setCategoryEdit(e.target.value
@@ -52,6 +52,32 @@ const getFrechApi = async(id) =>{
     } else {
       setLoading(false);
     }
+  };
+  const putCategory = async () => {
+    debugger
+    const url=`http://localhost:5000/Admin/category/${categorySelect}`
+    const result = await axios.put(
+      url,
+    
+      {"price":categoryEdit}
+    );
+    // if (result && result.data) {
+    //   setLoading(false);
+    // } else {
+    //   setLoading(false);
+    // }
+  };
+  const deleteCategory = async () => {
+    debugger
+    const url=`http://localhost:5000/Admin/category/${categorySelect}`
+    const result = await axios.delete(
+      url
+    );
+    // if (result && result.data) {
+    //   setLoading(false);
+    // } else {
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -111,10 +137,10 @@ const getFrechApi = async(id) =>{
                 />
               </div>
 
-              <Button type="primary" onClick={addCategory}>
+              <Button type="primary" onClick={putCategory}>
                 Edit
               </Button>
-              <Button type="danger" onClick={addCategory}>
+              <Button type="danger" onClick={deleteCategory}>
                 Delete
               </Button>
             </div>

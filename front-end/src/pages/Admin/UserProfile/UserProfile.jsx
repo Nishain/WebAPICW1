@@ -46,10 +46,20 @@ export default function UserProfile() {
     fetchApi()
     
   }, []);
-  const supendUser =(id)=>{
+  const supendUser = async(id,status)=>{
     debugger
-
-  }
+    const url=`http://localhost:5000/Admin/category/${id}`
+    const result = await axios.put(
+      url,
+    
+      {"isActive":status}
+    );
+    // if (result && result.data) {
+    //   setLoading(false);
+    // } else {
+    //   setLoading(false);
+    // }
+  };
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -174,7 +184,7 @@ export default function UserProfile() {
       dataIndex: '_id',
     key: '_id',
     width: "20%",
-    render: (value,d) => <div><Button type="danger" onClick={()=>supendUser(d._id)}>Suspend</Button><Button type="primary" onClick={()=>supendUser(d._id)}>Suspend</Button></div>,
+    render: (value,d) => <div> {(d.isActive) ? <Button type="danger" onClick={()=>supendUser(d._id,false)}>Suspend</Button>: <Button type="danger" onClick={()=>supendUser(d._id,true)}>Active</Button>} <Button type="primary" onClick={()=>supendUser(d._id)}>Edit</Button></div>,
     },
   ];
   return (

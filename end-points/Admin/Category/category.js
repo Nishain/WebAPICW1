@@ -29,9 +29,27 @@ router.post('/category',async (req,res)=>{
         return Helper.badRequest(res,error)
     }  
 })
-router.put('/:id',async (req,res)=>{
-    const category = await Category.findById(req.params.id)
-    if(category)
-        res.send()
-})
+router.put("/category/:id",async (req,res)=>{
+    let reqID=req.params.id
+    let category= await Category.findById(reqID);
+
+    if(!category){
+        return res.status(404).send("no such category")
+    }
+    category.set({price: req.body.price});
+    category=await category.save();
+    return res.send("Category updated successfully");
+
+});
+router.delete("/category/:id",async(req,res)=>{
+    let reqID=req.params.id
+    let category=await Category.findByIdAndDelete(reqID);
+    if(!category){
+        return res.status(404).send("no such Category")
+    }
+
+
+    res.send(category);
+
+});
 module.exports = router
