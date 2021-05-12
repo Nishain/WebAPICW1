@@ -3,8 +3,13 @@ const express = require('express')
 const mongoose = require('mongoose')
 const constants = require('./constants')
 const cookieParser = require('cookie-parser')
+
 require('dotenv').config()
 const app = express()
+// const generateSalt = async () =>{
+//     console.log(await require('bcrypt').genSalt(1))
+// }
+// generateSalt()
 app.use(cors({credentials:true,origin:constants.clientURL}))
 app.use(cookieParser())
 app.use(express.json())

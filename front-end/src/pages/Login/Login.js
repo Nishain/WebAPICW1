@@ -14,6 +14,8 @@ import { BottomButton } from "./BottomPrimaryButton";
 import cookie from 'js-cookie'
 import {Modal,Button} from 'antd'
 import endPoints from '../endPoints'
+import bycrypt from 'bcryptjs'
+import {encode as urlSafeEncode} from 'url-safe-base64'
 import BottomSecondaryButton from "./BottomSecondaryButton";
 export class Login extends Component {
   state = { isBlocked: false,
@@ -48,6 +50,7 @@ export class Login extends Component {
   }
   
   componentDidMount() {
+    console.log(process.env.REACT_APP_PASSWORD_SALT)
     if(this.props.redirect){
       if(this.props.errorTitle)
         return
@@ -84,20 +87,12 @@ export class Login extends Component {
   }
   async thirdPartySignIn(userID,email,provider,profileImage){
     const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + "auth/link",{linkID:userID})).data
-    if(result.requireRegistration){
-      const thirdParty = {
-        email : email,
-        provider : provider,
-        userID : userID
-      }
-      return this.setState({isLogin:false,thirdPartySignUp:thirdParty})
-    }else if(result.authorize){
-      sessionStorage.setItem('profileImage',profileImage)
-      return this.props.history.replace(endPoints.dashboard);
-    }else if(result.requiredToConfirm){
-      this.state.Email = email
-      this.requestEmailConfirmation()
+    const thirdParty = {
+      email : email,
+      provider : provider,
+      userID : userID
     }
+    this.handleAuthentication(result,true,thirdParty)
   }
   async requestForgetPassword() {
     const result = (await axios.post(
@@ -150,6 +145,9 @@ export class Login extends Component {
       "district"
     ];
     var postBody = this.getParamsFromInput(modelFields)
+    postBody['password'] = await bycrypt.hash(postBody['password'],process.env.REACT_APP_PASSWORD_SALT)
+    postBody['confirmPassword'] = await bycrypt.hash(postBody['confirmPassword'],process.env.REACT_APP_PASSWORD_SALT)
+    
     if(this.state.thirdPartySignUp){
       postBody['isProviderEnabledAccount'] = true
       postBody['quickSignInID'] = this.state.thirdPartySignUp.userID
@@ -215,26 +213,48 @@ export class Login extends Component {
   navigateToDashbaord() {
     this.props.history.replace(endPoints.dashboard);
   }
-   login() {
+  handleAuthentication(data,isThirdPartyAuthentication,thirdParyInfo=undefined){
+    if(data.salt)
+      return { salt : data.salt }
+    if(data.requiredToConfirm){
+      this.setState({ errorMessage: undefined });
+      if(isThirdPartyAuthentication){
+        this.state.Email = thirdParyInfo.email
+      }
+      this.requestEmailConfirmation()
+      return
+    }
+    if (data.authorize) {
+      this.setState({ errorMessage: undefined });
+      if(isThirdPartyAuthentication)
+        sessionStorage.setItem('profileImage',profileImage) //setting the profile image from the provider
+      return this.navigateToDashbaord()
+    } else if(isThirdPartyAuthentication && result.requireRegistration){
+      return this.setState({isLogin:false,thirdPartySignUp:thirdParyInfo})
+    }
+    else if (data.attemptsRemain != undefined) {
+      this.setState({
+        errorMessage: `Invalid credentials only ${data.attemptsRemain} attempts remaining`,
+      });
+    }
+    if(!isThirdPartyAuthentication)
+      this.showErrorFieldsIfNeeded(data)
+  }
+   async login() {
     let modelPaths = ["email","password"]
+    var paramBody = this.getParamsFromInput(modelPaths)
+    const saltResult = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/salt/',{email:paramBody.email})).data
+    const authenticationResult = this.handleAuthentication(saltResult,false)
+    if(!authenticationResult.salt)
+      return //the authentication is handled in different way
+    const saltFromServer = authenticationResult.salt
+    const firstHash = await bycrypt.hash(paramBody.password,process.env.REACT_APP_PASSWORD_SALT)  
+    const secondHash = await bycrypt.hash(firstHash,saltFromServer)
+    paramBody.password = secondHash
     axios
-      .post(process.env.REACT_APP_API_ENDPOINT + "auth/",this.getParamsFromInput(modelPaths))
+      .post(process.env.REACT_APP_API_ENDPOINT + "auth/",paramBody)
       .then((response)  => {
-        console.log(response.data); 
-        if(response.data.requiredToConfirm){
-          this.setState({ errorMessage: undefined });
-          this.requestEmailConfirmation()
-          return
-        }
-        if (response.data.authorize) {
-          this.setState({ errorMessage: undefined });
-          this.navigateToDashbaord()
-        } else if (response.data.attemptsRemain != undefined) {
-          this.setState({
-            errorMessage: `Invalid credentials only ${response.data.attemptsRemain} attempts remaining`,
-          });
-        } 
-        this.showErrorFieldsIfNeeded(response.data)
+        this.handleAuthentication(response.data,false)
       })
       .catch((error) => {
         console.log(error);

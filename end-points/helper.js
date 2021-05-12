@@ -21,7 +21,7 @@ class Helper {
         return true
     }
     notFound(res){
-        return res.status(404).send({error:'the requested resource not found!'})
+        return res.status(404).send({notFound:true,error:'the requested resource not found!'})
     }
     showFields(object,includes,except){
         var result = {}

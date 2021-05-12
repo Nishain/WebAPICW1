@@ -13,8 +13,8 @@ export default class TopNavigation extends Component {
   }
   getUserName = ()=>{
     if(!Cookie.get('jwt'))
-      return ''
-    console.log(Cookie.get('jwt').replace('j:',''))
+      return ''  
+    console.log(Cookie.get('jwt').replace('j:','')) //need to remove j: at begining
     return JSON.parse(Cookie.get('jwt').replace('j:','')).username
   }
   render() {

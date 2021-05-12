@@ -26,6 +26,7 @@ const schema = mongoose.Schema({
         type:Number
     },
     password:String,
+    hashSalt:String,
     district:{
         required:true,
         type:String
