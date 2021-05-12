@@ -29,6 +29,7 @@ async signOut(){
   cookie.remove('jwt')
   this.props.history.replace('/')
   }
+  
   render() {
     return (
     
