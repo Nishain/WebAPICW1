@@ -2,6 +2,7 @@ import { Component } from "react";
 import {Link} from 'react-router-dom'
 import icon from '../common/photo.png'
 import '../CustomerDashboard/css/style.scss' 
+import Cookie from 'js-cookie'
 export default class TopNavigation extends Component {
   constructor(){
     super()
@@ -9,6 +10,12 @@ export default class TopNavigation extends Component {
   }
   signOut(){
     this.props.signOut()
+  }
+  getUserName = ()=>{
+    if(!Cookie.get('jwt'))
+      return ''
+    console.log(Cookie.get('jwt').replace('j:',''))
+    return JSON.parse(Cookie.get('jwt').replace('j:','')).username
   }
   render() {
     return (
@@ -39,7 +46,7 @@ export default class TopNavigation extends Component {
     Menu <span class="badge badge-light">{this.props.notificationCount}</span>
   </button>
   <div className="dropdown-menu dropdown-menu-right">
-    <div className="dropdown-item"><img href="https://lh3.googleusercontent.com/a-/AOh14GhrS8Klr890213eRLR-pLW82af-R3tvhvcXXm32vg=s96-c"/></div>
+    <div className="dropdown-item">{this.getUserName()}<img className="profileAvatar float-right" src={sessionStorage.getItem('profileImage')}/></div>
     <Link className="dropdown-item">My Cart <span className="badge badge-danger">4</span></Link> 
     <Link className="dropdown-item">Another action</Link> 
     <Link className="dropdown-item d-flex ">Notifications <span className="badge badge-danger">{this.props.notificationCount}</span></Link> 

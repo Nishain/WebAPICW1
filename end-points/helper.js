@@ -72,11 +72,12 @@ class Helper {
         }else
             return false
     }
-    sendJWTAuthenticationCookie(res,email){
+    sendJWTAuthenticationCookie(res,email,username){
         res.cookie('jwt',{
             token:jwt.sign({email:email},
             process.env.jwtSecret,//secret
-            {expiresIn:'1h'})
+            {expiresIn:'1h'}),
+            username:username
         })
         return res
     }

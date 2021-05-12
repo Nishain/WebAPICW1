@@ -65,7 +65,7 @@ export class Login extends Component {
     console.log(googleData);
     const userID = googleData.profileObj.googleId
     const email = googleData.profileObj.email
-    this.thirdPartySignIn(userID,email,'google')
+    this.thirdPartySignIn(userID,email,'google',googleData.profileObj.imageUrl)
   };
   handleGoogleSignUpError = (error) => {
     console.log(error)
@@ -80,9 +80,9 @@ export class Login extends Component {
     window.FB.logout();
     console.log(data);
     const userID = data.userID
-    this.thirdPartySignIn(userID,data.email,'facebook')
+    this.thirdPartySignIn(userID,data.email,'facebook',data.picture.data.url)
   }
-  async thirdPartySignIn(userID,email,provider){
+  async thirdPartySignIn(userID,email,provider,profileImage){
     const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + "auth/link",{linkID:userID})).data
     if(result.requireRegistration){
       const thirdParty = {
@@ -92,6 +92,7 @@ export class Login extends Component {
       }
       return this.setState({isLogin:false,thirdPartySignUp:thirdParty})
     }else if(result.authorize){
+      sessionStorage.setItem('profileImage',profileImage)
       return this.props.history.replace(endPoints.dashboard);
     }else if(result.requiredToConfirm){
       this.state.Email = email

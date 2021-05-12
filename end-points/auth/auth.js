@@ -63,7 +63,7 @@ router.post('/verify',async (req,res)=>{
             res.send({fieldError:true,message:'the user does not exist'})
         else{
             await target.set({isEmailConfirmed:true,emailConfirmationCode:undefined}).save()
-            Helper.sendJWTAuthenticationCookie(res,email).send({confirmSuccess:true})    
+            Helper.sendJWTAuthenticationCookie(res,email,target.firstName).send({confirmSuccess:true})    
         }
     }else
         sendCodeToEmail('emailConfirm',req,res)
@@ -119,8 +119,8 @@ async function authenticate(thirdParty,req,res){
             return res.send({requiredToConfirm:true})
         }
         await user.set({isLogged:true}).save()
-        Helper.sendJWTAuthenticationCookie(res,user.email)
-        .send({authorize:true,message:'you are authenticated'})
+        Helper.sendJWTAuthenticationCookie(res,user.email,user.firstName)
+        .send({authorize:true,message:'you are authenticated',userName:user.firstName})
     }
     else{
         if(thirdParty)

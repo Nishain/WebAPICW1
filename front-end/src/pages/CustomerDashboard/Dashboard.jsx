@@ -26,6 +26,7 @@ export class Dashboard extends Component {
   }
   async signOut(){
     await axios.get(process.env.REACT_APP_API_ENDPOINT+'auth/signout/')
+    sessionStorage.removeItem('profileImage')
     cookie.remove('jwt')
     this.props.history.replace('/')
   }
