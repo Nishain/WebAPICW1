@@ -25,7 +25,8 @@ const schema = mongoose.Schema({
         required:true,
         type:Number
     },
-    password:{
+    password:String,
+    district:{
         required:true,
         type:String
     },
@@ -45,6 +46,7 @@ const schema = mongoose.Schema({
         type:Boolean,
         default:false
     },
+    quickSignInID:String,
     forgetPasswordCode:String,
     emailConfirmationCode:String
 })

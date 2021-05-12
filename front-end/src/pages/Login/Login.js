@@ -10,10 +10,11 @@ import { InputFieldFragments } from "./InputFieldFragments";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 import { GoogleLogin } from "react-google-login";
 import axios from "axios";
-import { BottomButton } from "./BottomButton";
+import { BottomButton } from "./BottomPrimaryButton";
 import cookie from 'js-cookie'
 import {Modal,Button} from 'antd'
-
+import endPoints from '../endPoints'
+import BottomSecondaryButton from "./BottomSecondaryButton";
 export class Login extends Component {
   state = { isBlocked: false,
     isLogin: true,
@@ -37,53 +38,70 @@ export class Login extends Component {
     
    // Axios.defaults.withCredentials = true
     this.tapLoginOrRegisterBtn = this.tapLoginOrRegisterBtn.bind(this);
-    this.sendEmail = this.sendEmail.bind(this);
+    this.requestForgetPassword = this.requestForgetPassword.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.login = this.login.bind(this);
     this.swapFunctionality = this.swapFunctionality.bind(this);
     this.rememberMe = this.rememberMe.bind(this)
     this.submitEmailConfirmCode = this.submitEmailConfirmCode.bind(this)
+    this.onEmailConfimationClose = this.onEmailConfimationClose.bind(this)
   }
   
   componentDidMount() {
     fullHeight();
     setPasswordToggler();
-    
+    this.getDistricts()
     this.setState({rememberMe:localStorage.getItem('rememberMe') || 1})
-    axios.interceptors.response.use(
-      (response) => {
-        return response;
-      },
-      (error) => {
-        console.log(error)
-        if (error.response.status == 401 && error.response.data.invalidToken){
-          console.log('ouch! invalid token')
-        }
-        else if (error.response.status == 401 && error.response.data.IPBlocked) {
-          this.setState({ isBlocked: true });
-        }
-        return error.response;
-      }
-    );
+    
     this.ping();
   }
 
-  handleGoogleSignUp = async (googleData) => {
+  handleGoogleSignIn =  (googleData) => {
     console.log(googleData);
+    const userID = googleData.profileObj.googleId
+    const email = googleData.profileObj.email
+    this.thirdPartySignIn(userID,email,'google')
   };
+  handleGoogleSignUpError = (error) => {
+    console.log(error)
+  }
   handleInputChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
-  onFacebookSignIn(data) {
+  setDefaultValueSilently = (fieldName,value)=>{
+    this.state[fieldName] = value
+  }
+  onFacebookSignIn = (data) =>{
     window.FB.logout();
     console.log(data);
+    const userID = data.userID
+    this.thirdPartySignIn(userID,data.email,'facebook')
   }
-  async sendEmail() {
+  async thirdPartySignIn(userID,email,provider){
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + "auth/link",{linkID:userID})).data
+    if(result.requireRegistration){
+      const thirdParty = {
+        email : email,
+        provider : provider,
+        userID : userID
+      }
+      return this.setState({isLogin:false,thirdPartySignUp:thirdParty})
+    }else if(result.authorize){
+      return this.props.history.replace(endPoints.dashboard);
+    }else if(result.requiredToConfirm){
+      this.state.Email = email
+      this.requestEmailConfirmation()
+    }
+  }
+  async requestForgetPassword() {
     const result = (await axios.post(
         process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword",
         { email: this.state.Email }
       )).data
-    this.showErrorFieldsIfNeeded(result)
+    if(this.showErrorFieldsIfNeeded(result))
+      return
+    else if(result.success)
+        Modal.success({content:'a link has submited for your email address to password reset'})
     console.log(result);
   }
   async ping() {
@@ -105,7 +123,7 @@ export class Login extends Component {
     for (const key in this.state) {
       const index = modelFields.findIndex(
         (mf) =>
-          mf.toLocaleLowerCase() == key.replace(" ", "").toLocaleLowerCase()
+          mf.toLocaleLowerCase() == key.replaceAll(" ", "").toLocaleLowerCase()
       );
       if (index < 0) continue;
       params[modelFields[index]] = this.state[key];
@@ -123,22 +141,33 @@ export class Login extends Component {
       "city",
       "zipCode",
       "phoneNumber",
+      "district"
     ];
+    var postBody = this.getParamsFromInput(modelFields)
+    if(this.state.thirdPartySignUp){
+      postBody['isProviderEnabledAccount'] = true
+      postBody['quickSignInID'] = this.state.thirdPartySignUp.userID
+    }
     const result = (
-      await axios.post(process.env.REACT_APP_API_ENDPOINT + "users/", this.getParamsFromInput(modelFields))
+      await axios.post(process.env.REACT_APP_API_ENDPOINT + "users/", postBody)
     ).data;
-    
     if (!this.showErrorFieldsIfNeeded(result)) {
       if(result.success){
         return this.requestEmailConfirmation()
-        //return this.props.history.replace('/Dashboard')
+        //return this.props.history.replace(endPoints.dashboard)
       }
       this.setState({ errorMessage: undefined });
     }
   }
-  showErrorFieldsIfNeeded(result){
+  
+  showErrorFieldsIfNeeded(result,externalFields=undefined){
     if (result.fieldError) {
-      this.invalidateFields(result.fields);
+      var fields = []
+      if(externalFields){
+        fields = externalFields
+      }else
+        fields = result.fields
+      this.invalidateFields(fields);
       this.setState({ errorMessage: result.msg });
       return true
     }
@@ -170,19 +199,21 @@ export class Login extends Component {
     );
     for (const inputField of allInputFields) {
       let isFieldInvalid = formatedInvalidFields.includes(
-        inputField.getAttribute("name").replace(" ", "").toLowerCase()
+        inputField.getAttribute("name").replaceAll(" ", "").toLowerCase()
       );
       if (isFieldInvalid) {
         inputField.className = "form-control is-invalid";
       } else inputField.className = "form-control";
     }
   }
- 
-  login() {
+  navigateToDashbaord() {
+    this.props.history.replace(endPoints.dashboard);
+  }
+   login() {
     let modelPaths = ["email","password"]
     axios
       .post(process.env.REACT_APP_API_ENDPOINT + "auth/",this.getParamsFromInput(modelPaths))
-      .then((response) => {
+      .then((response)  => {
         console.log(response.data); 
         if(response.data.requiredToConfirm){
           this.setState({ errorMessage: undefined });
@@ -191,7 +222,7 @@ export class Login extends Component {
         }
         if (response.data.authorize) {
           this.setState({ errorMessage: undefined });
-          return this.props.history.replace("/Dashboard");
+          this.navigateToDashbaord()
         } else if (response.data.attemptsRemain != undefined) {
           this.setState({
             errorMessage: `Invalid credentials only ${response.data.attemptsRemain} attempts remaining`,
@@ -203,32 +234,53 @@ export class Login extends Component {
         console.log(error);
       });
   }
-  renderInputFieldFragments(isLogin){
+  async getDistricts(){
+    const result = (await axios.get(process.env.REACT_APP_API_ENDPOINT + 'districts/')).data
+    this.setState({districts:[""].concat(result.list.map(district=>district.name))})
+    //console.log(this.state.districts)
+  }
+  removeThirdParty = () => {
+    this.setState({thirdPartySignUp:undefined})
+  }
+   renderInputFieldFragments(isLogin){
     var book = isLogin ? [["Email","Password"]] :[
-      ["Email","Password","Confirm Password"],
+      this.state.thirdPartySignUp ? 
+      [{
+        default :this.state.thirdPartySignUp.email,
+        field:"Email",
+        setDefaultValueSilently:this.setDefaultValueSilently
+      }] : ["Email","Password","Confirm Password"],
       [ "First Name","Last Name","Phone Number","Address"],
-      [ "City","Zip Code"]
+      [ "City","Zip Code","District"]
     ]
     if(this.props.forgetPassword){
       book = [["Password","Confirm Password"]]
     }
+
     if(!isLogin)
-      setPasswordToggler()
-    return book.map((page,index)=>
+      setPasswordToggler() 
+    const elements = book.map((page,index)=>
         <div className="half p-4 py-md-5">
           {index == 0 && <div className="w-100">
-            <h3 className="mb-4">{this.props.forgetPassword ? 'Forget Password' : `Sign ${isLogin ? 'In':'Up'}`}</h3>
+            <h3 className="mb-4">{this.props.forgetPassword ? 'Forget Password' :
+             `Sign ${isLogin ? 'In':this.state.thirdPartySignUp?`Up with ${this.state.thirdPartySignUp.provider}`:'Up'}`}</h3>
+             {this.state.thirdPartySignUp && <button className="btn btn-danger" onClick={this.removeThirdParty}>remove provider</button> }
           </div>
           }
         <InputFieldFragments
         fields={page}
+        dropDownItems={this.state.districts}
         handleInputChange={this.handleInputChange} />
-        {index == (book.length -1) && <BottomButton 
+        {index == (book.length -1) && <><BottomButton 
           errorMessage={this.state.errorMessage} 
           buttonLabel={this.props.forgetPassword ? 'Change Password' : (this.state.isLogin ? 'Login' : 'Sign Up')}
           isLogin={this.state.isLogin} 
-          tapLoginOrRegisterBtn={this.tapLoginOrRegisterBtn}/>}
+          tapLoginOrRegisterBtn={this.tapLoginOrRegisterBtn}/>
+          <BottomSecondaryButton isLogin={isLogin} swapFunctionality={this.swapFunctionality} /></>}
         </div>)
+        if(this.state.thirdPartySignUp)
+          this.state.thirdPartySignUp.email = undefined //silently update the state without rendering the DOM again...
+        return elements
   }
  
   rememberMe(event){
@@ -241,15 +293,6 @@ export class Login extends Component {
 
         {this.renderInputFieldFragments(this.state.isLogin)}
         <div className="half p-4 py-md-5 bg-primary">
-          <div className="form-group">
-            <button
-              onClick={this.swapFunctionality}
-              type="submit"
-              className="form-control btn btn-secondary rounded submit px-3"
-            >
-              {this.state.isLogin ? "Sign me in now" : "Back to login"}
-            </button>
-          </div>
           <div className="form-group d-md-flex">
             <div className="w-50 text-left">
               <label className="checkbox-wrap checkbox-primary mb-0">
@@ -259,7 +302,7 @@ export class Login extends Component {
               </label>
             </div>
             <div className="w-50 text-md-right">
-              <a onClick={this.sendEmail}>Forgot Password</a>
+              <a onClick={this.requestForgetPassword}>Forgot Password</a>
             </div>
           </div>
           <p className="w-100 text-center" style={{ color: "white" }}>
@@ -279,7 +322,7 @@ export class Login extends Component {
                   </a>
                 )}
                 callback={this.onFacebookSignIn}
-                fields="name,email,picture"
+                fields="email,picture"
               />
 
               <GoogleLogin
@@ -294,8 +337,8 @@ export class Login extends Component {
                     <span className="fa fa-google"></span>
                   </a>
                 )}
-                onSuccess={this.handleGoogleSignUp}
-                onFailure={this.handleGoogleSignUp}
+                onSuccess={this.handleGoogleSignIn}
+                onFailure={this.handleGoogleSignUpError}
                 cookiePolicy={"single_host_origin"}
               />
             </p>
@@ -315,11 +358,15 @@ export class Login extends Component {
   }
   async submitEmailConfirmCode(){
     const code = this.state['Email Verification code']
+    console.log(this.state)
     this.setState({proccessEmailValidation:true})
     const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email,code:code})).data
-    console.log(result)
+    this.setState({proccessEmailValidation:false})
     if(result.confirmSuccess){
       this.onEmailConfimationClose()
+      this.navigateToDashbaord()
+    }else{
+      this.showErrorFieldsIfNeeded(result,['EmailVerificationCode'])
     }
   }
   onEmailConfimationClose(){
@@ -335,10 +382,12 @@ export class Login extends Component {
         className="img"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)) ,url(${bg})`,
-          objectFit: "cover",
+          objectFit: "contain",
         }}
       >
       <Modal visible={this.state.shouldShowEmailConfimation} confirmLoading={this.state.proccessEmailValidation}
+       closable={false}
+       maskClosable={false}
        onCancel={this.onEmailConfimationClose}
        onOk={this.submitEmailConfirmCode}>
         <p>We have sent you the code to your email address.Check it and type the code below</p>
@@ -358,13 +407,12 @@ export class Login extends Component {
             <div className="row justify-content-center">
               <div className={this.state.isLogin ? "col-md-12 col-lg-7" : "col-md-12 col-lg-10"} >
                 <div className="login-wrap">
-                  {this.state.isBlocked || (this.props.forgetPassword && this.state.isForgetCodeInvalid) ? (
+                  {this.props.errorTitle || (this.props.forgetPassword && this.state.isForgetCodeInvalid) ? (
                     <div className="card text-center">
                       <div className="card-body">
-                        <h5 className="card-title">{this.state.isBlocked ? 'Your IP is tempolary blocked':'Invalid Forget password code'}</h5>
+                        <h5 className="card-title">{this.props.forgetPassword ? 'Invalid Forget password code':this.props.errorTitle}</h5>
                         <p className="card-text">
-                          { (this.state.isBlocked && <>This is the result of attempting to fail to login
-                          within 3 attempts</>) || <>Invalid forget password code please check your email address</>
+                          { (this.props.errorMessage && <>{this.props.errorMessage}</>) || <>Invalid forget password code please check your email address</>
                           }
                         </p>
                       </div>
