@@ -23,6 +23,9 @@ export default function Layout() {
             case 'CourierService':
               history.push('/Admin/CourierService')
               break;
+            case 'ViewCourierService':
+              history.push('/Admin/ViewCourierService')
+              break;
             case 'Transaction':
               history.push('/Admin/Transaction')
               break;
@@ -66,6 +69,14 @@ export default function Layout() {
             </NavIcon>
             <NavText>
             Courier Service
+            </NavText>
+          </NavItem>
+          <NavItem eventKey="ViewCourierService">
+            <NavIcon>
+              <i className="fa fa-fw fas fa-eye" style={{ fontSize: '1.75em' }} />
+            </NavIcon>
+            <NavText>
+            View Courier Service
             </NavText>
           </NavItem>
           <NavItem eventKey="Transaction">
