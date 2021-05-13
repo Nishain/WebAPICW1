@@ -26,6 +26,7 @@ const schema = mongoose.Schema({
         type:Number
     },
     password:String,
+    hashSalt:String,
     district:{
         required:true,
         type:String
@@ -46,6 +47,11 @@ const schema = mongoose.Schema({
         type:Boolean,
         default:false
     },
+    isAdmin:{
+        type:Boolean,
+        default:false
+    },
+    adminPermissionCode:String,
     quickSignInID:String,
     forgetPasswordCode:String,
     emailConfirmationCode:String

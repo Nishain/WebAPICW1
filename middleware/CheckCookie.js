@@ -3,7 +3,7 @@ const helper = require('../end-points/helper');
 const User = require('../models/User')
 module.exports = async function checkCookie(req, res, next) {
   console.log(req.path)
-  const exceptions = ['/users/','/users/forgetPassword']  
+  const exceptions = ['/users/','/districts/']  
   if(exceptions.findIndex(p=>req.path.startsWith(p)) > -1)
     return next()
    
@@ -17,7 +17,9 @@ module.exports = async function checkCookie(req, res, next) {
       if(!targetUser) 
         return helper.invalidToken(res,'user in token is not valid logged user')
       if(!targetUser.isActive)
-        return res.status(401).send({accountInActive:true})
+        return helper.reportAccountDeactivated(res)
+      req.userEmail = targetUser.email
+      req.isAdmin = targetUser.isAdmin || false 
     } catch (error) {
         console.log(`no token ${req.path}`)
         return helper.invalidToken(res,'invalid token')
