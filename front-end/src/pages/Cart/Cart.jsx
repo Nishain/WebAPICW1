@@ -108,7 +108,7 @@ const Cart =() => {
         </table>
       </div>
 
-      <div className="row  btn-group  d-flex">
+      <div className="row  btn-group  d-flex"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            style={{ padding: 50 }}>
             <div className="col-md-6">
                     <div className="row ">
                         <Button type="Default" icon={<PlusOutlined />}>
