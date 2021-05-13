@@ -1,6 +1,9 @@
 const router= require('express').Router()
 const Category = require('../../../models/Admin/Category')
 const Helper = require('../../helper')
+const {
+    categoryValidation
+  } = require('../../../middleware/category.validation');
 function mapRequestBodyToSchema(req){
     var obj = {}
     for(key in req.body){
@@ -26,7 +29,8 @@ router.get('/category/:id',async (req,res)=>{
     else
         return Helper.notFound(res)
 })
-router.post('/category',async (req,res)=>{
+router.post('/category',categoryValidation,async (req,res)=>{
+   
     const newCategory = mapRequestBodyToSchema(req)
     try {
         await newCategory.save()
@@ -35,7 +39,7 @@ router.post('/category',async (req,res)=>{
         return Helper.badRequest(res,error)
     }  
 })
-router.put("/category/:id",async (req,res)=>{
+router.put("/category/:id",categoryValidation,async (req,res)=>{
     let reqID=req.params.id
     let category= await Category.findById(reqID);
 

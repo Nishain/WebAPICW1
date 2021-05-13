@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Input, Button, Modal } from "antd";
-import { CategoryValues, CategoryTypes } from "./extranalData";
+import { Input, Button, Modal,Popconfirm, message  } from "antd";
+import { CategoryValues, CategoryTypes,CategoryEdit } from "./extranalData";
 import axios from "axios";
 
 export default function Category() {
@@ -10,6 +10,7 @@ export default function Category() {
   const [loading, setLoading] = useState(false);
   const [loadCategory, setLoadCategory] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [messagelog,setMessage]=useState("");
   const showModal = () => {
     setIsModalVisible(true);
   };
@@ -52,12 +53,22 @@ export default function Category() {
     fetchApi();
   }, []);
   const addCategory = async () => {
+    debugger
     setLoading(true);
     const result = await axios.post(
       "http://localhost:5000/Admin/category",
       category
     );
+      
     if (result.data.success) {
+      setMessage(result.data.message)
+     
+      showModal();
+      
+    }
+    else if(result.status==400){
+      setMessage(result.data.message)
+     
       showModal();
     }
     if (result && result.data) {
@@ -66,14 +77,32 @@ export default function Category() {
       setLoading(false);
     }
   };
+  function confirm(e) {
+    deleteCategory()
+  }
+  
+  function cancel(e) {
+   
+  }
   const putCategory = async () => {
     debugger;
     const url = `http://localhost:5000/Admin/category/${categorySelect}`;
     const result = await axios.put(
       url,
 
-      { price: categoryEdit }
+      {categoryName:categorySelect, price: categoryEdit }
     );
+    if (result.status==200) {
+      setMessage(result.data)
+     
+      showModal();
+      
+    }
+    else if(result.status==400){
+      setMessage(result.data.message)
+     
+      showModal();
+    }
     // if (result && result.data) {
     //   setLoading(false);
     // } else {
@@ -154,18 +183,24 @@ export default function Category() {
               <Button type="primary" onClick={putCategory}>
                 Edit
               </Button>
-              <Button type="danger" onClick={deleteCategory}>
+              <Popconfirm
+    title="Are you sure to delete this task?"
+    onConfirm={confirm}
+    onCancel={cancel}
+    okText="Yes"
+    cancelText="No"
+  >
+              <Button type="danger" >
                 Delete
               </Button>
+              </Popconfirm>
               <Modal
                 title="Basic Modal"
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
               >
-                <p>Some contents...</p>
-                <p>Some contents...</p>
-                <p>Some contents...</p>
+               {messagelog}
               </Modal>
             </div>
           </div>
