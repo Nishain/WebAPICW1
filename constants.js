@@ -10,11 +10,11 @@ class Constants {
         email : {
             regex:this.emailRegex,
             message:'Enter a valid email'
-        },
-        phonenumber : {
-            regex : this.phoneNumberRegex,
-            message : 'Enter a valid phone number'
         }
+        // phonenumber : {
+        //     regex : this.phoneNumberRegex,
+        //     message : 'Enter a valid phone number'
+        // }
     }
     
     static async loadEnums(){

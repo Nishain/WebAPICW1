@@ -49,7 +49,7 @@ function render(){
       </Router>
       {/* admin */}
       <Router>
-      {/* <Layout/> */}
+      <Layout/>
         <Switch>
           <SecureRoute exact path={endPoints.admin.dashboard} component={Dashboard} />
           <SecureRoute exact path={endPoints.admin.userProfile} component={UserProfile} />

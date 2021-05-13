@@ -14,7 +14,7 @@ export default class SecureRoute extends Route {
           return response;
         },
         (error) => {
-          console.log(error);
+          console.log(error.response.data);
           if (!this.props.index && error.response.status == 401 && error.response.data.invalidToken) {  
             this.setFlag("invalidToken")
           } else if (
