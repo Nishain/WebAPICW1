@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken')
 const RandomCodeGenerator = require('randomatic')
 router.get('/',async (req,res)=>{
     if(!getUserType(req,undefined).admin)
-        helper.accessDenyUser('outsider','only an admin can do this',res)
+        return helper.accessDenyUser('outsider','only an admin can do this',res)
     const userList = await User.find()
     userList.map(acc => {
         return helper.trimSensitiveData(acc)
@@ -22,7 +22,7 @@ async function getUserByGETParams(req,res){
     const mode = req.params.mode    
     var identifier = req.params.identifier
 
-    if(mode == 'id' && !helper.isObjectIDValid(req.params.id)){
+    if(mode == 'id' && !helper.isObjectIDValid(identifier)){
         res.status(400).send({error:true,message:'object ID is not valid'})
         return {exitEarly : true}
     }
@@ -77,8 +77,7 @@ router.post('/',async (req,res)=>{
     res.send(newUser)
 })
 function getUserType(req,requestedUser){
-    req.userEmail = 'nishain.atomic@gmail.com'
-    req.isAdmin = true
+//    
     const loggedEmail = req.userEmail
     var userType
     if(requestedUser && requestedUser.email == loggedEmail){
@@ -102,6 +101,7 @@ router.put('/:mode/:identifier',async (req,res)=>{
      if(user.exitEarly)
         return   
     const userType = getUserType(req,user)
+    console.log(userType)
     if(userType.outsider)
         return res.status(401).send({
             user : 'outsider',

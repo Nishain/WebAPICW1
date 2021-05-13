@@ -21,7 +21,7 @@ export default function UserProfile() {
   }, []);
   const supendUser = async (id, status) => {
     debugger;
-    const url = `http://localhost:5000/users/${id}`;
+    const url = `http://localhost:5000/users/id/${id}`;
     const result = await axios.put(
       url,
 
@@ -57,7 +57,7 @@ export default function UserProfile() {
     });
   };
   const handleOk = async () => {
-    const url = `http://localhost:5000/users/${userEditData._id}`;
+    const url = `http://localhost:5000/users/id/${userEditData._id}`;
     const result = await axios.put(
       url,
 
