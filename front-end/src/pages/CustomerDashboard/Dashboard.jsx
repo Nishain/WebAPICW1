@@ -7,7 +7,7 @@ export class Dashboard extends Component {
   hiddenFileInput = React.createRef();
   constructor(){
     super()
-    this.signOut = this.signOut.bind(this)
+
   }
   state = {
     uploadedFiles:[],
@@ -24,16 +24,9 @@ export class Dashboard extends Component {
       this.state.uploadedFiles.splice(deleteIndex,1)
       this.setState({uploadedFiles:this.state.uploadedFiles})
   }
-  async signOut(){
-    await axios.get(process.env.REACT_APP_API_ENDPOINT+'auth/signout/')
-    sessionStorage.removeItem('profileImage')
-    cookie.remove('jwt')
-    this.props.history.replace('/')
-  }
   render() {
     return (
       <section>
-        <TopNavigation items={2} signOut={this.signOut}/>
         <div className="container row">
           <div className="card col-3 m-3">
             <div className="card-body">

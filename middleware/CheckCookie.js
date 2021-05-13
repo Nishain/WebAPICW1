@@ -18,6 +18,7 @@ module.exports = async function checkCookie(req, res, next) {
         return helper.invalidToken(res,'user in token is not valid logged user')
       if(!targetUser.isActive)
         return helper.reportAccountDeactivated(res)
+      req.userEmail = targetUser.email  
     } catch (error) {
         console.log(`no token ${req.path}`)
         return helper.invalidToken(res,'invalid token')

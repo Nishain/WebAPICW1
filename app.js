@@ -1,6 +1,7 @@
 const cors = require('cors')
 const express = require('express')
 const mongoose = require('mongoose')
+
 const constants = require('./constants')
 const cookieParser = require('cookie-parser')
 
@@ -16,7 +17,7 @@ app.use(express.json())
 
 app.use(require('./middleware/IPCheck'))
 app.use('/auth/',require('./end-points/auth/auth'))
-app.use(require('./middleware/CheckCookie'))
+//app.use(require('./middleware/CheckCookie'))
 app.use('/districts/',require('./end-points/districts/districtRoute'))
 app.get('/',(req,res)=>{
     return res.send({pingSuccess:true})
@@ -38,6 +39,7 @@ mongoose.connect(
     console.log('error has occured when connecting database '+err)
 })
 mongoose.set('useCreateIndex', true)
+constants.default.loadEnums()
 app.listen(process.env.PORT,()=>{
     console.log("server started on port "+process.env.PORT)
 })

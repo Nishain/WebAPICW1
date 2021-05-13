@@ -7,7 +7,7 @@ export const Admin = {
     category : '/Admin/Category/'
 }
 export default class EndPoints{
-    static dashboard = '/Dashboard'
+    static dashboard = '/Home'
     static admin = Admin
     static adminLogin = '/AdminLogin'
     static productsView = '/ProductView'
