@@ -166,7 +166,7 @@ async function authenticate(thirdParty, req, res) {
     }
     }
   if (passwordMatch) {
-      
+    const isUserAdmin = user.isAdmin  
     if (!user.isActive) return Helper.reportAccountDeactivated(res, true);
     const blockedIP = BlockedIP.findOne({ ip: req.ip });
     if (blockedIP) {
@@ -177,6 +177,7 @@ async function authenticate(thirdParty, req, res) {
     }
     await user.set({ isLogged: true }).save();
     Helper.sendJWTAuthenticationCookie(res, user.email, user.firstName).send({
+      isAdmin : isUserAdmin,  
       authorize: true,
       message: "you are authenticated",
       userName: user.firstName,

@@ -134,7 +134,8 @@ export class Login extends Component {
       "city",
       "zipCode",
       "phoneNumber",
-      "district"
+      "district",
+      "adminPermissionCode"
     ];
     var postBody = this.getParamsFromInput(modelFields)
     if(this.state.thirdPartySignUp){
@@ -291,7 +292,7 @@ export class Login extends Component {
         default :this.state.thirdPartySignUp.email,
         field:"Email",
         setDefaultValueSilently:this.setDefaultValueSilently
-      }] : ["Email","Password","Confirm Password"],
+      }] : ["Email","Password","Confirm Password","adminPermissionCode"],
       [ "First Name","Last Name","Phone Number","Address"],
       [ "City","Zip Code","District"]
     ]

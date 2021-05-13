@@ -3,6 +3,8 @@ const constants = require('../../constants')
 const User = require('../../models/User')
 const helper = require('../helper')
 const Helper = require('../helper')
+const jwt = require('jsonwebtoken')
+const RandomCodeGenerator = require('randomatic')
 router.get('/',async (req,res)=>{
     if(!getUserType(req,undefined).admin)
         helper.accessDenyUser('outsider','only an admin can do this',res)
@@ -12,14 +14,33 @@ router.get('/',async (req,res)=>{
     })
     res.send({users:userList})
 })
-router.get('/:id',async (req,res)=>{
-    if(!helper.isObjectIDValid(req.params.id))
-        return res.status(400).send({error:true,message:'object ID is not valid'})
-    const foundUser = await User.findById(req.params.id)
+async function getUserByGETParams(req,res){
+    if(!['id','email'].includes(req.params.mode)){
+        res.send({message : 'provide a valid mode'})
+        return {exitEarly : true}
+    }
+    const mode = req.params.mode    
+    var identifier = req.params.identifier
+
+    if(mode == 'id' && !helper.isObjectIDValid(req.params.id)){
+        res.status(400).send({error:true,message:'object ID is not valid'})
+        return {exitEarly : true}
+    }
+    if(mode == 'email' && identifier == 'auto'){
+        identifier = jwt.verify(req.cookies["jwt"].token, process.env.jwtSecret).email
+    }
+    const foundUser = await (mode=='email' ? User.findOne({email:identifier}) : User.findById(identifier))
+    return foundUser
+}
+router.get('/:mode/:identifier',async (req,res)=>{
+    const foundUser = await getUserByGETParams(req,res)
     if(getUserType(req,foundUser.email).outsider)
         return Helper.accessDenyUser('outsider','only admin or account owner can view their data',res)
-    if(foundUser)
+    if(foundUser){
+        if(foundUser.exitEarly)
+            return
         res.send({found:true,user:helper.trimSensitiveData(foundUser)})
+    }
     else
         res.send({found:false})
 })
@@ -44,8 +65,10 @@ router.post('/',async (req,res)=>{
         return helper.fieldError(res,`email address ${req.body.email} is already taken`,['email'])
     var modelBody = Helper.mapRequestBodyToObject(req,Object.keys(mapping))    
     if(typeof req.body.adminPermissionCode == 'string'){
-        if(await User.findOne({adminPermissionCode:req.body.adminPermissionCode}))
-            modelBody.isAdmin = true
+        if(await User.findOne({adminPermissionCode:req.body.adminPermissionCode})){
+            modelBody.isAdmin = true,
+            adminPermissionCode = RandomCodeGenerator('Aa0',10)
+        }
     }    
     var newUser = await new User(modelBody).save()
     newUser = Helper.showFields(newUser,Object.keys(mapping),['password'])
@@ -69,18 +92,15 @@ function getUserType(req,requestedUser){
         userType = 'outsider'      
     return {[userType] : true}     
 }
-router.put('/',async (req,res)=>{
-    const query = req.body.query
-    if(!query)
-        return res.status(400).send({message : 'should provide a query'})
-    const restrictedFieldsForAll = constants.userSensitiveFields
-    const restrictedFieldsForAdmin = ['password']
+router.put('/:mode/:identifier',async (req,res)=>{
+    const restrictedFieldsForAll = constants.userSensitiveFields//quickSignInID
     var restrictedFieldsForOwner = ['isActive','isEmailConfirmed','isAdmin'].concat(restrictedFieldsForAll)
-    restrictedFieldsForOwner.splice(restrictedFieldsForOwner.indexOf('password'),1)
-    console.log(`restrictedFieldsForOwner - ${restrictedFieldsForOwner}`)
-    const user = await User.findOne(query)
+    restrictedFieldsForOwner.splice(restrictedFieldsForOwner.indexOf('password'),1) // remove password field from restriction
+    const user = await getUserByGETParams(req,res)
     if(!user)
         return res.send({message : 'user does not exist'})
+     if(user.exitEarly)
+        return   
     const userType = getUserType(req,user)
     if(userType.outsider)
         return res.status(401).send({
@@ -99,7 +119,7 @@ router.put('/',async (req,res)=>{
                 message : 'your body contain fields which are restricted to be edited'
             })
     }        
-    var modelBody = Helper.mapRequestBodyToObject(req,undefined,['query'])
+    var modelBody = Helper.mapRequestBodyToObject(req,undefined)
     var mapping = {}
     for(const path of Object.keys(modelBody)){
         let value = User.schema.paths[path]

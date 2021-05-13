@@ -23,6 +23,7 @@ app.get('/',(req,res)=>{
     return res.send({pingSuccess:true})
 })
 app.use('/users/',require('./end-points/users/usersRoute'))
+app.use(require('./middleware/userTypeCheck'))
 app.use('/products/',require('./end-points/products/productRoute'))
 app.use('/Admin/',require('./end-points/Admin/Category/category'))
 app.use((req,res)=>{

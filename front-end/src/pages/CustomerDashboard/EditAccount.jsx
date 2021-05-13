@@ -8,15 +8,19 @@ export default class EditAccount extends Component{
     }
     async getDistricts(){
         const result = (await axios.get(process.env.REACT_APP_API_ENDPOINT + 'districts/')).data
-        console.log(result)
         this.setState({districts:[""].concat(result.list.map(district=>district.name))})
         //console.log(this.state.districts)
       }
     constructor(){
         super()
-        this.getDistricts()
+        
     }  
+    componentDidMount(){
+        this.getDefaultValues()
+        this.getDistricts()
+    }
     renderForm(){
+        
         const book = [
             ["Email","Password","Confirm Password"],
             [ "First Name","Last Name","Phone Number","Address"],
@@ -31,8 +35,11 @@ export default class EditAccount extends Component{
             </div>
         })
     }
-    getDefaultValues(){
-        
+    async getDefaultValues(){
+        console.log('start request')
+        const result = (await axios.get(process.env.REACT_APP_API_ENDPOINT + 'users/email/auto')).data
+        console.log('awaiting result')
+        console.log(result)
     }
     render(){
 
