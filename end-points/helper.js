@@ -18,11 +18,17 @@ class Helper {
             this.fieldError(res,invalidField.message,[invalidField.field])
             return false
         }
+        let invalidEnumField = this.checkEnums(Object.keys(structure),req)
+        if(invalidEnumField){
+            this.fieldError(res,invalidEnumField.message,[invalidEnumField.field])
+            return false
+        }
         return true
     }
     notFound(res){
-        return res.status(404).send({error:'the requested resource not found!'})
+        return res.status(404).send({notFound:true,error:'the requested resource not found!'})
     }
+    
     showFields(object,includes,except){
         var result = {}
         for(const field in object){
@@ -37,13 +43,32 @@ class Helper {
         object.Password = undefined
         return object
     }
-    mapRequestBodyToObject (req,fields=undefined){
+    mapRequestBodyToObject (req,fields=undefined,notInclude){
         var obj = {}
         for(const key in req.body){
-            if(fields == undefined || fields.includes(key))
+            if((notInclude == undefined || !notInclude.includes(key)) && (fields == undefined || fields.includes(key)))
             obj[key] = req.body[key]
         }
         return obj
+    }
+    checkEnums(fieldnames,req){
+        var invalidField = undefined
+        var enumData = undefined
+        for(const field of fieldnames){
+         enumData =  constants.default.enums[field.toLowerCase()]
+            if(!enumData)
+                continue
+            if(!enumData.includes(req.body[field])){
+                invalidField = field
+                break
+            }
+        }
+        if(invalidField)
+            return {
+                message: `field ${invalidField} should contain a value within enum [${enumData.join(',')}]`,
+                field : invalidField
+            }
+        return false
     }
     checkRegexValidation(fieldnames,req){
         var invalidFields = []
@@ -72,11 +97,28 @@ class Helper {
         }else
             return false
     }
-    sendJWTAuthenticationCookie(res,email){
+    doesRequestBodyContainRestrictedFields(req,restrictedFields){
+        const keys = Object.keys(req.body)
+        for(const field of restrictedFields){
+            if(keys.includes(field))
+                return true
+        }
+        return false
+    }
+    trimSensitiveData(obj){
+        var newObj = obj
+        const removingFields = ['forgetPasswordCode','password','quickSignInID','hashSalt','emailConfirmationCode']
+        for(const removeField of removingFields){
+            newObj[removeField] = undefined
+        }
+        return newObj
+    }
+    sendJWTAuthenticationCookie(res,email,username){
         res.cookie('jwt',{
             token:jwt.sign({email:email},
             process.env.jwtSecret,//secret
-            {expiresIn:'1h'})
+            {expiresIn:'1h'}),
+            username:username
         })
         return res
     }
@@ -119,6 +161,15 @@ class Helper {
     }
     badRequest(res,msg){
         return res.status(400).send({error:true,msg:msg})
+    }
+    reportAccountDeactivated(res,duringLogin = false){
+        res.status(401).send({accountInActive:true,onlogin:duringLogin})
+    }
+    accessDenyUser(userType,msg,res){
+        return res.status(401).send({
+            user : userType,
+            message : msg
+        })
     }
 }
 module.exports = new Helper()

@@ -14,6 +14,8 @@ import { BottomButton } from "./BottomPrimaryButton";
 import cookie from 'js-cookie'
 import {Modal,Button} from 'antd'
 import endPoints from '../endPoints'
+import bycrypt from 'bcryptjs'
+import {encode as urlSafeEncode} from 'url-safe-base64'
 import BottomSecondaryButton from "./BottomSecondaryButton";
 export class Login extends Component {
   state = { isBlocked: false,
@@ -48,19 +50,25 @@ export class Login extends Component {
   }
   
   componentDidMount() {
+    console.log(process.env.REACT_APP_PASSWORD_SALT)
+    if(this.props.redirect){
+      if(this.props.errorTitle)
+        return
+      return this.props.history.replace('/')
+    }
     fullHeight();
     setPasswordToggler();
     this.getDistricts()
     this.setState({rememberMe:localStorage.getItem('rememberMe') || 1})
     
-    this.ping();
+    this.checkValidForgetPasswordGateway();
   }
 
   handleGoogleSignIn =  (googleData) => {
     console.log(googleData);
     const userID = googleData.profileObj.googleId
     const email = googleData.profileObj.email
-    this.thirdPartySignIn(userID,email,'google')
+    this.thirdPartySignIn(userID,email,'google',googleData.profileObj.imageUrl)
   };
   handleGoogleSignUpError = (error) => {
     console.log(error)
@@ -75,27 +83,12 @@ export class Login extends Component {
     window.FB.logout();
     console.log(data);
     const userID = data.userID
-    this.thirdPartySignIn(userID,data.email,'facebook')
+    this.thirdPartySignIn(userID,data.email,'facebook',data.picture.data.url)
   }
-  async thirdPartySignIn(userID,email,provider){
-    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + "auth/link",{linkID:userID})).data
-    if(result.requireRegistration){
-      const thirdParty = {
-        email : email,
-        provider : provider,
-        userID : userID
-      }
-      return this.setState({isLogin:false,thirdPartySignUp:thirdParty})
-    }else if(result.authorize){
-      return this.props.history.replace(endPoints.dashboard);
-    }else if(result.requiredToConfirm){
-      this.state.Email = email
-      this.requestEmailConfirmation()
-    }
-  }
+  
   async requestForgetPassword() {
     const result = (await axios.post(
-        process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword",
+        process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword",
         { email: this.state.Email }
       )).data
     if(this.showErrorFieldsIfNeeded(result))
@@ -104,10 +97,10 @@ export class Login extends Component {
         Modal.success({content:'a link has submited for your email address to password reset'})
     console.log(result);
   }
-  async ping() {
+  async checkValidForgetPasswordGateway() {
     await axios.get(process.env.REACT_APP_API_ENDPOINT);
     if(this.props.forgetPassword){
-      const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword/" + this.props.match.params.code)).data
+      const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword/" + this.props.match.params.code)).data
       if(result.forgetPasswordPing && !result.userExist){
         this.setState({isForgetCodeInvalid:true})
       }
@@ -141,12 +134,16 @@ export class Login extends Component {
       "city",
       "zipCode",
       "phoneNumber",
-      "district"
+      "district",
+      "adminPermissionCode"
     ];
     var postBody = this.getParamsFromInput(modelFields)
     if(this.state.thirdPartySignUp){
       postBody['isProviderEnabledAccount'] = true
-      postBody['quickSignInID'] = this.state.thirdPartySignUp.userID
+      postBody['quickSignInID'] = await bycrypt.hash(this.state.thirdPartySignUp.userID,process.env.REACT_APP_PASSWORD_SALT)
+    }else{
+      postBody['password'] = await bycrypt.hash(postBody['password'],process.env.REACT_APP_PASSWORD_SALT)
+    postBody['confirmPassword'] = await bycrypt.hash(postBody['confirmPassword'],process.env.REACT_APP_PASSWORD_SALT)
     }
     const result = (
       await axios.post(process.env.REACT_APP_API_ENDPOINT + "users/", postBody)
@@ -176,7 +173,7 @@ export class Login extends Component {
   async forgetPassword(){
     var params = this.getParamsFromInput(['password','confirmPassword'])
     params.editPassword = true
-    const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "users/forgetPassword/" + this.props.match.params.code,
+    const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword/" + this.props.match.params.code,
     params)).data
     if(this.showErrorFieldsIfNeeded(result))
       return
@@ -209,26 +206,72 @@ export class Login extends Component {
   navigateToDashbaord() {
     this.props.history.replace(endPoints.dashboard);
   }
-   login() {
+  handleAuthentication(data,isThirdPartyAuthentication,thirdParyInfo=undefined){
+    if(data.salt)
+      return { salt : data.salt }
+    if(data.requiredToConfirm){
+      this.setState({ errorMessage: undefined });
+      if(isThirdPartyAuthentication){
+        this.state.Email = thirdParyInfo.email
+      }
+      this.requestEmailConfirmation()
+      return
+    }
+    if (data.authorize) {
+      this.setState({ errorMessage: undefined });
+      if(isThirdPartyAuthentication)
+        sessionStorage.setItem('profileImage',thirdParyInfo.profileImage) //setting the profile image from the provider
+      return this.navigateToDashbaord()
+    } else if(isThirdPartyAuthentication && data.requireRegistration){
+      return this.setState({isLogin:false,thirdPartySignUp:thirdParyInfo})
+    }
+    else if (data.attemptsRemain != undefined) {
+      this.setState({
+        errorMessage: `Invalid credentials only ${data.attemptsRemain} attempts remaining`,
+      });
+    }
+    if(!isThirdPartyAuthentication)
+      this.showErrorFieldsIfNeeded(data)
+  }
+  async getAuthSaltAndHash(valueToHash,email,isThirdPartyProviderAuthentication,thirdPartyAuthInfo=undefined){
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/salt/',
+    {email:email,thirdPartyProvider:isThirdPartyProviderAuthentication})).data
+    const authenticationResult = this.handleAuthentication(result,isThirdPartyProviderAuthentication,thirdPartyAuthInfo)
+    if(!authenticationResult || !authenticationResult.salt)
+      return {hashedValueAvailable:false}
+    const firstHash = await bycrypt.hash(valueToHash,process.env.REACT_APP_PASSWORD_SALT)  
+    const secondHash = await bycrypt.hash(firstHash,authenticationResult.salt)  
+    return {
+      hashedValueAvailable : true,
+      firstHash : firstHash,
+      finalHash : secondHash
+    }  
+  }
+   thirdPartySignIn = async(userID,email,provider,profileImage)=>{
+    const thirdParty = {
+      email : email,
+      provider : provider,
+      userID : userID,
+      profileImage : profileImage
+    }
+    const hashedData = await this.getAuthSaltAndHash(userID,email,true,thirdParty)
+    if(!hashedData.hashedValueAvailable)
+      return
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + "auth/link",
+      {linkID:hashedData.firstHash,reHashedLinkID:hashedData.finalHash})).data  
+    this.handleAuthentication(result,true,thirdParty)
+  }
+  login = async () => {
     let modelPaths = ["email","password"]
+    var paramBody = this.getParamsFromInput(modelPaths)
+    const hashData = await this.getAuthSaltAndHash(paramBody.password,paramBody.email,false)
+    if(!hashData.hashedValueAvailable)
+      return
+    paramBody.password = hashData.finalHash
     axios
-      .post(process.env.REACT_APP_API_ENDPOINT + "auth/",this.getParamsFromInput(modelPaths))
+      .post(process.env.REACT_APP_API_ENDPOINT + "auth/",paramBody)
       .then((response)  => {
-        console.log(response.data); 
-        if(response.data.requiredToConfirm){
-          this.setState({ errorMessage: undefined });
-          this.requestEmailConfirmation()
-          return
-        }
-        if (response.data.authorize) {
-          this.setState({ errorMessage: undefined });
-          this.navigateToDashbaord()
-        } else if (response.data.attemptsRemain != undefined) {
-          this.setState({
-            errorMessage: `Invalid credentials only ${response.data.attemptsRemain} attempts remaining`,
-          });
-        } 
-        this.showErrorFieldsIfNeeded(response.data)
+        this.handleAuthentication(response.data,false)
       })
       .catch((error) => {
         console.log(error);
@@ -249,7 +292,7 @@ export class Login extends Component {
         default :this.state.thirdPartySignUp.email,
         field:"Email",
         setDefaultValueSilently:this.setDefaultValueSilently
-      }] : ["Email","Password","Confirm Password"],
+      }] : ["Email","Password","Confirm Password","adminPermissionCode"],
       [ "First Name","Last Name","Phone Number","Address"],
       [ "City","Zip Code","District"]
     ]
@@ -348,7 +391,7 @@ export class Login extends Component {
     );
   }
   async requestEmailConfirmation(){
-    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email})).data
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/verify/',{email:this.state.Email})).data
     if(this.showErrorFieldsIfNeeded(result))
       return
     console.log(result)  
@@ -360,7 +403,7 @@ export class Login extends Component {
     const code = this.state['Email Verification code']
     console.log(this.state)
     this.setState({proccessEmailValidation:true})
-    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'users/verify/',{email:this.state.Email,code:code})).data
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/verify/',{email:this.state.Email,code:code})).data
     this.setState({proccessEmailValidation:false})
     if(result.confirmSuccess){
       this.onEmailConfimationClose()
