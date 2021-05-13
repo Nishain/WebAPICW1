@@ -1,0 +1,16 @@
+[
+    {
+            "_id":1,
+            "invoiceNo":1,
+            "TotalAmount":1450.00,
+            "Date":"2021-02-02",
+            "paymentStatus":"unpaid"
+    },
+    {
+            "_id":2 ,
+            "invoiceNo":2,
+            "TotalAmount":1350.00,
+            "Date":"2021-02-03",
+            "paymentStatus":"paid"
+    }
+]

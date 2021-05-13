@@ -13,12 +13,43 @@ router.get('/category',async (req,res)=>{
     const categoryList = await Category.find()
     res.send(categoryList)
 })
+router.get('/category/:id',async (req,res)=>{
+    const categoryitem = await Category.findById(req.params.id)
+    if(categoryitem)
+        return res.send(categoryitem)
+    else
+        return Helper.notFound(res)
+})
 router.post('/category',async (req,res)=>{
     const newCategory = mapRequestBodyToSchema(req)
     try {
-        res.send(await newCategory.save())
+        await newCategory.save()
+        res.send({success:true,message:'email successfully sent!'})
     } catch (error) {
         return Helper.badRequest(res,error)
     }  
 })
+router.put("/category/:id",async (req,res)=>{
+    let reqID=req.params.id
+    let category= await Category.findById(reqID);
+
+    if(!category){
+        return res.status(404).send("no such category")
+    }
+    category.set({price: req.body.price});
+    category=await category.save();
+    return res.send("Category updated successfully");
+
+});
+router.delete("/category/:id",async(req,res)=>{
+    let reqID=req.params.id
+    let category=await Category.findByIdAndDelete(reqID);
+    if(!category){
+        return res.status(404).send("no such Category")
+    }
+
+
+    res.send(category);
+
+});
 module.exports = router
