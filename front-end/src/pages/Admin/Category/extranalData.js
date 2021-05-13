@@ -1,6 +1,6 @@
 export const CategoryValues = {
     categoryName: "",
-    price: "",
+    price: "0.00",
    
   };
   export const CategoryEdit={

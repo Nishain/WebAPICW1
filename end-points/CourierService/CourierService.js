@@ -2,6 +2,9 @@ const router = require("express").Router();
 const CourierService = require("../../models/Admin/CourierService");
 const Helper = require("../helper");
 const _ = require("lodash");
+const {
+  courierServiceValidation
+} = require('../../middleware/CourierService.validatetion');
 function mapRequestBodyToSchema(req) {
   var obj = {};
   for (const key in req) {

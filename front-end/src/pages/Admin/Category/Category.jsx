@@ -28,6 +28,25 @@ export default function Category() {
       [type]: e.target.value,
     });
   };
+  const onFocusHandler = (type) => (e) => {
+    debugger
+    if(e.target.value=="0.00")
+    {
+      setCategory({
+        ...category,
+        [type]: "",
+      });
+    }
+  };
+  const onFocusOutHandler = (type) => (e) => {
+    if(e.target.value=="")
+    {
+      setCategory({
+        ...category,
+        [type]: "0.00",
+      });
+    }
+  };
   const onChangeSelectHandler = (e) => {
     debugger;
     setCategorySelect(e.target.value);
@@ -135,6 +154,7 @@ export default function Category() {
                   placeholder="Basic usage"
                   value={category.categoryName}
                   onChange={onChangeHandler(CategoryTypes.category)}
+                  
                 />
               </div>
               <div className="form-group">
@@ -142,6 +162,8 @@ export default function Category() {
                   placeholder="Amount"
                   value={category.price}
                   onChange={onChangeHandler(CategoryTypes.price)}
+                  onFocus={onFocusHandler(CategoryTypes.price)}
+                  onBlur={onFocusOutHandler(CategoryTypes.price)}
                 />
               </div>
 

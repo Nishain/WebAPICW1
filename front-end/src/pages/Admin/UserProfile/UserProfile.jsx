@@ -21,7 +21,7 @@ export default function UserProfile() {
   }, []);
   const supendUser = async (id, status) => {
     debugger;
-    const url = `http://localhost:5000/users/id/${id}`;
+    const url = `http://localhost:5000/users/${id}`;
     const result = await axios.put(
       url,
 
@@ -36,7 +36,7 @@ export default function UserProfile() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const editUserModal = async (id) => {
-    const url = `http://localhost:5000/users/${id}`;
+    const url = `http://localhost:5000/users/id/${id}`;
     const result = await axios.get(url);
     userEditData._id=result.data.user._id
     userEditValues.email=result.data.user.email

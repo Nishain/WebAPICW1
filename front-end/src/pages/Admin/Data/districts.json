@@ -2,175 +2,175 @@
     {
         "id":1,
         "districtName":"Ampara",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":2,
         "districtName":"Anuradhapura",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":3,
         "districtName":"Badulla",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":4,
         "districtName":"Batticaloa",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":5,
         "districtName":"Colombo",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":6,
         "districtName":"Galle",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":7,
         "districtName":"Gampaha",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":8,
         "districtName":"Hambantota",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":9,
         "districtName":"Jaffna",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":10,
         "districtName":"Kalutara",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":11,
         "districtName":"Kandy",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":12,
         "districtName":"Kegalle",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":13,
         "districtName":"Kilinochchi",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":14,
         "districtName":"Kurunegala",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":15,
         "districtName":"Mannar",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":16,
         "districtName":"Matale",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":17,
         "districtName":"Matara",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":18,
         "districtName":"Monaragala",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":19,
         "districtName":"Mullaitivu",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":20,
         "districtName":"Nuwara Eliya",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":21,
         "districtName":"Polonnaruwa",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":22,
         "districtName":"Puttalam",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":23,
         "districtName":"Ratnapura",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":24,
         "districtName":"Trincomalee",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
     ,
     {
         "id":25,
         "districtName":"Vavuniya",
-        "value":"",
+        "value":"0.00",
         "CourierServiceName":""
     }
 ]
