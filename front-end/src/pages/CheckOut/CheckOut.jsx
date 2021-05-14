@@ -27,7 +27,7 @@ const CheckOut =()=> {
               />
             </div>
             <div className="form-group">
-              <label>Enter First Name</label>
+              <label>Last Name</label>
               <Input
                 placeholder="Basic usage"
                 value={userEditData.firstName}
@@ -35,7 +35,7 @@ const CheckOut =()=> {
               />
             </div>
             <div className="form-group">
-              <label>Enter Last Name</label>
+              <label>Address</label>
               <Input
                 placeholder="Basic usage"
                 value={userEditData.lastName}
@@ -43,7 +43,7 @@ const CheckOut =()=> {
               />
             </div>
             <div className="form-group">
-              <label>Enter Phone Number</label>
+              <label>City</label>
               <Input
                 placeholder="Basic usage"
                 value={userEditData.phoneNumber}
@@ -51,7 +51,7 @@ const CheckOut =()=> {
               />
             </div>
             <div className="form-group">
-              <label>Enter city</label>
+              <label>Zip Code</label>
               <Input
                 placeholder="Basic usage"
                 value={userEditData.city}
@@ -59,7 +59,23 @@ const CheckOut =()=> {
               />
             </div>
             <div className="form-group">
-              <label>Enter zip Code</label>
+              <label>District</label>
+              <Input
+                placeholder="Basic usage"
+                value={userEditData.zipCode}
+                onChange={onChangeHandler(userEditTypes.zipCode)}
+              />
+            </div>
+            <div className="form-group">
+              <label>Email</label>
+              <Input
+                placeholder="Basic usage"
+                value={userEditData.zipCode}
+                onChange={onChangeHandler(userEditTypes.zipCode)}
+              />
+            </div>
+            <div className="form-group">
+              <label>Phone Number</label>
               <Input
                 placeholder="Basic usage"
                 value={userEditData.zipCode}
@@ -69,7 +85,7 @@ const CheckOut =()=> {
 
               </div>
               <div className="col-md-6">
-              <label>Enter Email</label>
+              {/* <label>Email</label> */}
               
               </div>
           </div>

@@ -19,6 +19,8 @@ app.use('/users/',require('./end-points/users/usersRoute'))
 app.use('/products/',require('./end-points/products/productRoute'))
 app.use('/Admin/',require('./end-points/Admin/Category/category'))
 app.use('/Admin/',require('./end-points/CourierService/CourierService'))
+app.use('/addToCart/',require('./end-points/addToCart'))
+// app.use('/Invoice',require('./end-points/Invoice/Invoice'))
 app.use((req,res)=>{
     res.status(404).send({
         error:true,
