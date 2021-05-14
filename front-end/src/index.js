@@ -8,6 +8,7 @@ import Dashboard from './pages/Admin/Dashboard/Dashboard'
 import ProductView from "./pages/ProductView/ProductView";
 import Cart from "./pages/Cart/Cart";
 import Invoice from "./pages/Invoice/Invoice";
+import checkout from "./pages/CheckOut/CheckOut";
 import adminLogin from "./pages/Admin/Login/adminLogin";
 import Layout from "./pages/Admin/Shared/Layout/Layout";
 import UserProfile from "./pages/Admin/UserProfile/UserProfile";
@@ -42,6 +43,9 @@ function render(){
           <SecureRoute index={true} exact path="/" component={Login} />
           <Route exact  path={endPoints.forgetPassword} render={(props)=><Login {...props} forgetPassword={true} />} />
           <SecureRoute exact path={endPoints.productsView} component={ProductView} /> 
+          <SecureRoute  exact path="/Cart" component={Cart} /> 
+          <SecureRoute  exact path="/Invoice" component={Invoice}/> 
+          <SecureRoute  exact path="/Checkout" component={checkout}/> 
           <Route  path={endPoints.dashboard} component={Home} />
           <SecureRoute exact path={endPoints.adminLogin} component={adminLogin} /> 
           {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
