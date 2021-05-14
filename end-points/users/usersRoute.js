@@ -82,10 +82,8 @@ router.post('/',async (req,res)=>{
     res.send(newUser)
 })
 function getUserType(res,requestedUser){
-//    
+//    askdjas
     const loggedEmail = res.locals.userEmail
-    console.log(`logged email ${loggedEmail}`)
-    console.log(`requestedUser user email ${requestedUser.email}`)
     var userType
     if(requestedUser && requestedUser.email == loggedEmail){
         userType = 'owner'

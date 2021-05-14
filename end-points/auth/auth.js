@@ -98,6 +98,7 @@ router.post("/verify", async (req, res) => {
         .save();
         
       Helper.sendJWTAuthenticationCookie(res, target, target.firstName).send({
+        isAdmin:target.isAdmin,
         confirmSuccess: true,
       });
     }

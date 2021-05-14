@@ -53,8 +53,9 @@ export class Login extends Component {
   componentDidMount() {
     console.log(process.env.REACT_APP_PASSWORD_SALT)
     if(this.props.redirect){
-      if(this.props.errorTitle)
+      if(this.props.errorTitle){
         return
+      }
       return this.props.history.replace('/')
     }
     fullHeight();
@@ -208,8 +209,8 @@ export class Login extends Component {
       } else inputField.className = "form-control";
     }
   }
-  navigateToDashbaord() {
-    this.props.history.replace(endPoints.dashboard);
+  navigateToDashbaord(isUserAdmin) {
+    this.props.history.replace(isUserAdmin ? endPoints.admin.dashboard : endPoints.dashboard);
   }
   handleAuthentication(data,isThirdPartyAuthentication,thirdParyInfo=undefined){
     if(data.salt)
@@ -226,7 +227,7 @@ export class Login extends Component {
       this.setState({ errorMessage: undefined });
       if(isThirdPartyAuthentication)
         sessionStorage.setItem('profileImage',thirdParyInfo.profileImage) //setting the profile image from the provider
-      return this.navigateToDashbaord()
+      return this.navigateToDashbaord(data.isAdmin)
     } else if(isThirdPartyAuthentication && data.requireRegistration){
       return this.setState({isLogin:false,thirdPartySignUp:thirdParyInfo})
     }
@@ -359,7 +360,7 @@ export class Login extends Component {
           <div className="w-100">
             <p className="social-media d-flex justify-content-center">
               <FacebookLogin
-                appId="4334533943277653"
+                appId={process.env.REACT_APP_FACEBOOK_ID}
                 render={(btnProps) => (
                   <a
                     className="social-icon d-flex align-items-center justify-content-center"
@@ -410,7 +411,7 @@ export class Login extends Component {
     this.setState({proccessEmailValidation:false})
     if(result.confirmSuccess){
       this.onEmailConfimationClose()
-      this.navigateToDashbaord()
+      this.navigateToDashbaord(result.isAdmin)
     }else{
       this.showErrorFieldsIfNeeded(result,['EmailVerificationCode'])
     }
