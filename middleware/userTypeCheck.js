@@ -4,13 +4,18 @@ const User = require('../models/User')
 const getUserType = async (req,res,next)=>{
     const exceptionList = []
     if(exceptionList.findIndex(p=>req.path.startsWith(p)) > -1)
-    return next()
-    const data = jwt.verify(req.cookies["jwt"].token, process.env.jwtSecret);
+        return next()
+    var data
+    try{
+        data = jwt.verify(req.cookies["jwt"].token, process.env.jwtSecret);
+    }catch(error){
+        return next()
+    }
     const targetUser = await User.findOne({email:data.email,isLogged:true})
     if(!targetUser)
         return next()
     if(targetUser.isAdmin)
         return next()
-    return Helper.accessDenyUser('non-admin','only admins can access these domains',res)   
+    return res.status(401).send({adminDomain:true})//Helper.accessDenyUser('non-admin','only admins can access these domains',res)   
 }
 module.exports = getUserType

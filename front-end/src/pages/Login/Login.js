@@ -17,6 +17,7 @@ import endPoints from '../endPoints'
 import bycrypt from 'bcryptjs'
 import {encode as urlSafeEncode} from 'url-safe-base64'
 import BottomSecondaryButton from "./BottomSecondaryButton";
+import helper from "../common/helper";
 export class Login extends Component {
   state = { isBlocked: false,
     isLogin: true,
@@ -52,8 +53,9 @@ export class Login extends Component {
   componentDidMount() {
     console.log(process.env.REACT_APP_PASSWORD_SALT)
     if(this.props.redirect){
-      if(this.props.errorTitle)
+      if(this.props.errorTitle){
         return
+      }
       return this.props.history.replace('/')
     }
     fullHeight();
@@ -171,9 +173,13 @@ export class Login extends Component {
     return false
   }
   async forgetPassword(){
+    const forgetPasswordCode = this.props.match.params.code
     var params = this.getParamsFromInput(['password','confirmPassword'])
+    
     params.editPassword = true
-    const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword/" + this.props.match.params.code,
+    params.password = await helper.hash(params.password)
+    params.confirmPassword = await helper.hash(params.confirmPassword)
+    const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword/" + forgetPasswordCode,
     params)).data
     if(this.showErrorFieldsIfNeeded(result))
       return
@@ -203,8 +209,8 @@ export class Login extends Component {
       } else inputField.className = "form-control";
     }
   }
-  navigateToDashbaord() {
-    this.props.history.replace(endPoints.dashboard);
+  navigateToDashbaord(isUserAdmin) {
+    this.props.history.replace(isUserAdmin ? endPoints.admin.dashboard : endPoints.dashboard);
   }
   handleAuthentication(data,isThirdPartyAuthentication,thirdParyInfo=undefined){
     if(data.salt)
@@ -221,7 +227,7 @@ export class Login extends Component {
       this.setState({ errorMessage: undefined });
       if(isThirdPartyAuthentication)
         sessionStorage.setItem('profileImage',thirdParyInfo.profileImage) //setting the profile image from the provider
-      return this.navigateToDashbaord()
+      return this.navigateToDashbaord(data.isAdmin)
     } else if(isThirdPartyAuthentication && data.requireRegistration){
       return this.setState({isLogin:false,thirdPartySignUp:thirdParyInfo})
     }
@@ -234,11 +240,11 @@ export class Login extends Component {
       this.showErrorFieldsIfNeeded(data)
   }
   async getAuthSaltAndHash(valueToHash,email,isThirdPartyProviderAuthentication,thirdPartyAuthInfo=undefined){
-    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/salt/',
+    const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + 'auth/salt/',
     {email:email,thirdPartyProvider:isThirdPartyProviderAuthentication})).data
     const authenticationResult = this.handleAuthentication(result,isThirdPartyProviderAuthentication,thirdPartyAuthInfo)
-    if(!authenticationResult || !authenticationResult.salt)
-      return {hashedValueAvailable:false}
+    if(!authenticationResult || !authenticationResult.salt || !valueToHash)
+      return {hashedValueAvailable:false} 
     const firstHash = await bycrypt.hash(valueToHash,process.env.REACT_APP_PASSWORD_SALT)  
     const secondHash = await bycrypt.hash(firstHash,authenticationResult.salt)  
     return {
@@ -354,7 +360,7 @@ export class Login extends Component {
           <div className="w-100">
             <p className="social-media d-flex justify-content-center">
               <FacebookLogin
-                appId="4334533943277653"
+                appId={process.env.REACT_APP_FACEBOOK_ID}
                 render={(btnProps) => (
                   <a
                     className="social-icon d-flex align-items-center justify-content-center"
@@ -394,20 +400,18 @@ export class Login extends Component {
     const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/verify/',{email:this.state.Email})).data
     if(this.showErrorFieldsIfNeeded(result))
       return
-    console.log(result)  
     if(result.success){
       this.setState({shouldShowEmailConfimation:true})
     }
   }
   async submitEmailConfirmCode(){
     const code = this.state['Email Verification code']
-    console.log(this.state)
     this.setState({proccessEmailValidation:true})
     const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/verify/',{email:this.state.Email,code:code})).data
     this.setState({proccessEmailValidation:false})
     if(result.confirmSuccess){
       this.onEmailConfimationClose()
-      this.navigateToDashbaord()
+      this.navigateToDashbaord(result.isAdmin)
     }else{
       this.showErrorFieldsIfNeeded(result,['EmailVerificationCode'])
     }

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Route } from "react-router";
-import { Login } from "./pages/Login/Login";
-import { useHistory } from 'react-router-dom'
+import { Login } from "../Login/Login";
+import { ServerErrorPage } from '../staticPages/ServerErrorPage'
 export default class SecureRoute extends Route {
   state = {
     secureFlag: undefined,
@@ -14,6 +14,10 @@ export default class SecureRoute extends Route {
           return response;
         },
         (error) => {
+          if(!error.response){
+            this.setFlag('serverError')
+            return error.response
+          }
           console.log(error.response.data);
           if (!this.props.index && error.response.status == 401 && error.response.data.invalidToken) {  
             this.setFlag("invalidToken")
@@ -24,11 +28,13 @@ export default class SecureRoute extends Route {
             this.setFlag({ secureFlag: "IPBlock" });
           }else if((!this.props.index && error.response.data.accountInActive) || (this.props.index && error.response.data.onlogin && error.response.data.accountInActive)){
             this.setFlag("AccountDisabled")
+          }else if(error.response.data.adminDomain){
+            this.setFlag("AdminDomain")
           }
           return error.response;
         }
       );
-       axios.get(process.env.REACT_APP_API_ENDPOINT)
+       axios.get(process.env.REACT_APP_API_ENDPOINT + `ping/${this.props.path.toLowerCase().includes('admin') ? 'admin' : 'normal'}`)
   }
   setFlag(flag){
       if(this.state.secureFlag == flag)
@@ -50,11 +56,17 @@ export default class SecureRoute extends Route {
     AccountDisabled : {
         title : 'Your account is disabled',
         message : 'Your account is being disabled by the admin.Please contact the admin for more details'
+    },
+    AdminDomain : {
+      title : 'Those endpoints are reserved for admin',
+      message : 'you are redirected back because you try to enter restricted domain. You need admin privileges to enter these domain'
     }
    }   
    render() { 
     var propsClone = this.clone(this.props);
     if (this.state.secureFlag) {
+      if(this.state.secureFlag == 'serverError')
+        return <ServerErrorPage />
       propsClone.component = undefined;
       propsClone.render = (props) => {
         var loginProps = props;
