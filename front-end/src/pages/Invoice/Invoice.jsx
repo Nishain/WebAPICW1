@@ -1,11 +1,27 @@
-import React from 'react'
+import React, { useState, useEffect } from "react";
 import "./invoice.scss"
 import { Image } from "antd";
-
-
-
+import axios from "axios";
 
 const Invoice=()=> {
+
+    const [cartData, setCartData] = useState([]);
+    const [totalPrce, setTotalPrice] = useState();
+
+    const fetchApi = async () => {
+        const result = await axios.get("http://localhost:5000/addToCart");
+        var tt = 0.0;
+        setCartData(result ? result.data : []);
+        for (var xx = 0; xx < result.data.length; xx++) {
+          tt += result.data[xx].Price;
+        }
+        setTotalPrice(tt);
+      };
+    
+      useEffect(() => {
+        fetchApi();
+      }, []);
+
     return (
         <div>
             <div className="page-content container">
@@ -84,40 +100,24 @@ const Invoice=()=> {
                                 </div>
 
                                 <div className="text-95 text-secondary-d3">
-                                    <div className="row mb-2 mb-sm-0 py-25">
-                                        <div className="d-none d-sm-block col-1">1</div>
-                                        <div className="col-9 col-sm-3"> <Image width={100} src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png" /></div>
-                                        <div className="d-none d-sm-block col-2">4(inch) * 4(inch)</div>
-                                        <div className="d-none d-sm-block col-2">200.00</div>
-                                        <div className="d-none d-sm-block col-2 text-95">2</div>
-                                        <div className="col-2 text-secondary-d2">400.00</div>
-                                    </div>
+                                {cartData.length > 0 && cartData.map((element, index) => (
 
-                                    <div className="row mb-2 mb-sm-0 py-25 bgc-default-l4">
-                                        <div className="d-none d-sm-block col-1">2</div>
-                                        <div className="col-9 col-sm-3"> <Image width={100} src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png" /></div>
-                                        <div className="d-none d-sm-block col-2">4(inch) * 4(inch)</div>
-                                        <div className="d-none d-sm-block col-2">200.00</div>
-                                        <div className="d-none d-sm-block col-2 text-95">2</div>
-                                        <div className="col-2 text-secondary-d2">400.00</div>
+                                    <div className="row mb-2 mb-sm-0 py-25">                                     
+                                        <div className="d-none d-sm-block col-1">{index + 1}</div>
+                                        <div className="col-9 col-sm-3"> <Image width={100} src={element.photoURL} /></div>
+                                        <div className="d-none d-sm-block col-2">{element.categoryName}</div>
+                                        <div className="d-none d-sm-block col-2">{element.unitPrice}</div>
+                                        <div className="d-none d-sm-block col-2 text-95">{element.qty}</div>
+                                        <div className="col-2 text-secondary-d2">{element.Price}</div>
                                     </div>
-
-                                    <div className="row mb-2 mb-sm-0 py-25">
-                                        <div className="d-none d-sm-block col-1">3</div>
-                                        <div className="col-9 col-sm-3"> <Image width={100} src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png" /></div>
-                                        <div className="d-none d-sm-block col-2">4(inch) * 4(inch)</div>
-                                        <div className="d-none d-sm-block col-2">200.00</div>
-                                        <div className="d-none d-sm-block col-2 text-95">2</div>
-                                        <div className="col-2 text-secondary-d2">400.00</div>
-                                    </div>
-
+                                ))}
+                                    
                                 </div>
 
                                 <div className="row border-b-2 brc-default-l2"></div>
 
                                 <div className="row mt-3">
                                     <div className="col-12 col-sm-7 text-grey-d2 text-95 mt-2 mt-lg-0">
-                                        Extra note such as company or payment information...
                                     </div>
 
                                     <div className="col-12 col-sm-5 text-grey text-90 order-first order-sm-last">
