@@ -17,18 +17,20 @@ app.use(express.json())
 
 app.use(require('./middleware/IPCheck'))
 app.use('/auth/',require('./end-points/auth/auth'))
-app.use(require('./middleware/CheckCookie'))
+// app.use(require('./middleware/CheckCookie'))
 app.use('/districts/',require('./end-points/districts/districtRoute'))
 app.get('/',(req,res)=>{
     return res.send({pingSuccess:true})
 })
 app.use('/users/',require('./end-points/users/usersRoute'))
-app.use(require('./middleware/userTypeCheck'))
+// app.use(require('./middleware/userTypeCheck'))
 app.use('/products/',require('./end-points/products/productRoute'))
 app.use('/Admin/',require('./end-points/Admin/Category/category'))
 app.use('/Admin/',require('./end-points/CourierService/CourierService'))
 app.use('/Admin/',require('./end-points/Admin/invoice/invoice'))
 app.use('/Admin/',require('./end-points/Admin/Transaction/Transaction'))
+app.use('/addToCart/',require('./end-points/addToCart'))
+// app.use('/Invoice',require('./end-points/Invoice/Invoice'))
 app.use((req,res)=>{
     res.status(404).send({
         error:true,

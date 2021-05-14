@@ -6,7 +6,7 @@ router.post('/invoice',async (req,res)=>{
    
      
     if(!req.body.invoiceNo){
-        return res.status(400).send("name is empty");
+        return res.status(400).send("invoice number is empty");
     }
     else if(!req.body.TotalAmount){
         return res.status(400).send("TotalAmount is empty");
