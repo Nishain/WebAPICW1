@@ -6,7 +6,7 @@ import { Login } from "./pages/Login/Login";
 import Home from "./pages/CustomerDashboard/Home";
 
 import ProductView from "./pages/ProductView/ProductView";
-
+import Page404 from '../src/pages/staticPages/404Page/404Page'
 import adminLogin from "./pages/Admin/Login/adminLogin";
 
 import reportWebVitals from "./reportWebVitals";
@@ -32,13 +32,16 @@ function render(){
           <SecureRoute exact path={endPoints.productsView} component={ProductView} /> 
           <SecureRoute  path={endPoints.dashboard} component={Home} />
           <SecureRoute exact path={endPoints.adminLogin} component={adminLogin} /> 
+          
           {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
         </Switch>
       </Router>
       {/* admin */}
       <Router>
         <SecureRoute path='/Admin' component={AdminRoute} />
+        
       </Router>
+      
       </React.StrictMode>,
     document.getElementById("root")
   );

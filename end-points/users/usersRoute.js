@@ -87,10 +87,10 @@ function getUserType(res,requestedUser){
     var userType
     if(requestedUser && requestedUser.email == loggedEmail){
         userType = 'owner'
-        if(requestedUser.isAdmin)
-            userType = 'adminOwner'
+        // if(requestedUser.isAdmin)
+        //     userType = 'adminOwner'
     }
-    else if(res.isAdmin)
+    else if(res.locals.isAdmin)
         userType = 'admin'
     else
         userType = 'outsider'      

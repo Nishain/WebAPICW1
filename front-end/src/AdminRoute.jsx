@@ -10,6 +10,7 @@ import Dashboard from './pages/Admin/Dashboard/Dashboard'
 import endPoints from './pages/endPoints'
 import Cart from "./pages/Cart/Cart";
 import Invoice from "./pages/Invoice/Invoice";
+import Page404 from '../src/pages/staticPages/404Page/404Page'
 export const AdminRoute = (props)=>{
     return (
         <>
@@ -22,6 +23,7 @@ export const AdminRoute = (props)=>{
           <Route exact path="/Admin/viewcourierservice" component={ViewCourierService} />
           <Route exact path={endPoints.admin.transaction} component={Transaction} />
           <Route exact path={endPoints.admin.category} component={Category} />
+          <Route component={Page404}/>
         </Switch>
         </>
     )
