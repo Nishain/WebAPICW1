@@ -28,7 +28,6 @@ export class InputFieldFragments extends Component {
         className="form-control passwordField"
         placeholder={fieldName}
         onChange={this.props.handleInputChange}
-        required
       />
       <div class="invalid-feedback"> Please check your password</div>
       <span

@@ -54,6 +54,7 @@ const schema = mongoose.Schema({
     adminPermissionCode:String,
     quickSignInID:String,
     forgetPasswordCode:String,
-    emailConfirmationCode:String
+    emailConfirmationCode:String,
+    sessionCode:String
 })
 module.exports = mongoose.model("User",schema)

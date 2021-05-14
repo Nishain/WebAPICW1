@@ -16,6 +16,7 @@ export default class TopNavigation extends Component {
       return ''  
     console.log(Cookie.get('jwt').replace('j:','')) //need to remove j: at begining
     return JSON.parse(Cookie.get('jwt').replace('j:','')).username
+    
   }
   render() {
     return (

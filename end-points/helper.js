@@ -1,6 +1,7 @@
 const Mongoose = require('mongoose')
 const constants = require('../constants')
 const jwt = require('jsonwebtoken')
+const randomatic = require('randomatic')
 class Helper {
     validateFields(req,res,structure){
         let emptyFields = this.checkIfEmpty(req,Object.keys(structure))
@@ -113,9 +114,33 @@ class Helper {
         }
         return newObj
     }
-    sendJWTAuthenticationCookie(res,email,username){
+    setUserSignUpMethod(acc){
+        var newObj = acc
+        if(typeof acc.quickSignInID == 'string' && typeof acc.password == 'string'){
+            newObj['signUpMode'] = 'undetermined' //very rare case
+            return newObj
+        }
+        if(typeof acc.quickSignInID == 'string'){
+            newObj['signUpMode'] = 'thirdParty'
+        }
+        else{
+            newObj['signUpMode'] = 'normal'
+        }
+        return newObj        
+    }
+    clone(obj){
+        var newObj = {}
+        for(const key in obj){
+            newObj[key] = obj[key]
+        }
+        return newObj
+    }
+    getSessionCode(){
+        return randomatic('Aa0',15)
+    }
+    sendJWTAuthenticationCookie(res,user,username){
         res.cookie('jwt',{
-            token:jwt.sign({email:email},
+            token:jwt.sign({email:user.email,sessionCode : user.sessionCode},
             process.env.jwtSecret,//secret
             {expiresIn:'1h'}),
             username:username
@@ -165,6 +190,7 @@ class Helper {
     reportAccountDeactivated(res,duringLogin = false){
         res.status(401).send({accountInActive:true,onlogin:duringLogin})
     }
+    
     accessDenyUser(userType,msg,res){
         return res.status(401).send({
             user : userType,

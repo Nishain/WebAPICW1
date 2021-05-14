@@ -25,16 +25,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.js";
 import "antd/dist/antd.css"
 // import ProductView from "./pages/ProductView/ProductView";
-import SecureRoute from "./SecureRoute";
-import {Dashboard as Customer} from './pages/CustomerDashboard/Dashboard'
+import SecureRoute from '../src/pages/common/SecureRoute'
 axios.defaults.withCredentials = true
 function render(){
-  const homeRoutes = [
-    {
-      path : 'Home/something',
-      component : Customer
-    }
-  ]
   ReactDOM.render(
     <React.StrictMode>
       <Router>
@@ -42,14 +35,14 @@ function render(){
           <SecureRoute index={true} exact path="/" component={Login} />
           <Route exact  path={endPoints.forgetPassword} render={(props)=><Login {...props} forgetPassword={true} />} />
           <SecureRoute exact path={endPoints.productsView} component={ProductView} /> 
-          <Route  path={endPoints.dashboard} component={Home} />
+          <SecureRoute  path={endPoints.dashboard} component={Home} />
           <SecureRoute exact path={endPoints.adminLogin} component={adminLogin} /> 
           {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
         </Switch>
       </Router>
       {/* admin */}
       <Router>
-      <Layout/>
+      {/* <Layout/> */}
         <Switch>
           <SecureRoute exact path={endPoints.admin.dashboard} component={Dashboard} />
           <SecureRoute exact path={endPoints.admin.userProfile} component={UserProfile} />

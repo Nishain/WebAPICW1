@@ -40,9 +40,7 @@ export default class Home extends Component {
   render() {
     return (
       <section>
-        <Link to='Home/something' className="float-right">Go</Link>
           <TopNavigation items={2} signOut={this.signOut}/>
-          
           <Switch>
             <Route exact path='/Home/' component={Dashboard} />
             <Route exact path='/Home/edit' component={EditAccount} />

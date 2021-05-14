@@ -58,20 +58,24 @@ async function sendCodeToEmail(role, req, res) {
           : { emailConfirmationCode: code };
       console.log(paramBody);
       await targetUser.set(paramBody).save();
-      res.send({ success: true, message: "email successfully sent!" });
+      res.send({ success: true,email:targetUser.email, message: "email successfully sent!" });
     }
   });
 }
 router.post("/forgetPassword", async (req, res) => {
   sendCodeToEmail("forgetPassword", req, res);
 });
-router.post("/salt", async (req, res) => {
-  const email = req.body.email;
+router.put("/salt", async (req, res) => {
+
+  const isForgetPasswordCodeSubmited = typeof req.body.forgetPasswordCode == 'string'
+  const email = req.body.email
+  const forgetPasswordCode = req.body.forgetPasswordCode
   let isThirdPartyAuthentication = req.body.thirdPartyProvider
-  if (!Helper.validateFields(req, res,{ email: "String" })) return;
-  const targetUser = await User.findOne({ email: email });
+  if (!Helper.validateFields(req, res,isForgetPasswordCodeSubmited ? {forgetPasswordCode : 'String'} : { email: "String" })) return;
+  const targetUser = await User
+    .findOne(isForgetPasswordCodeSubmited ? {forgetPasswordCode : forgetPasswordCode} : { email: email });
   if (!targetUser) 
-    return await handleAuthenticationFailure(isThirdPartyAuthentication,res)
+    return await handleAuthenticationFailure(isThirdPartyAuthentication,req,res)
   const salt = await bycrypt.genSalt(1);
   await targetUser.set({ hashSalt: salt }).save();
   res.send({ salt: salt });
@@ -90,9 +94,10 @@ router.post("/verify", async (req, res) => {
       res.send({ fieldError: true, message: "the user does not exist" });
     else {
       await target
-        .set({ isEmailConfirmed: true, emailConfirmationCode: undefined })
+        .set({ isEmailConfirmed: true, emailConfirmationCode: undefined,sessionCode:Helper.getSessionCode() })
         .save();
-      Helper.sendJWTAuthenticationCookie(res, email, target.firstName).send({
+        
+      Helper.sendJWTAuthenticationCookie(res, target, target.firstName).send({
         confirmSuccess: true,
       });
     }
@@ -175,8 +180,8 @@ async function authenticate(thirdParty, req, res) {
     if (!user.isEmailConfirmed) {
       return res.send({ requiredToConfirm: true });
     }
-    await user.set({ isLogged: true }).save();
-    Helper.sendJWTAuthenticationCookie(res, user.email, user.firstName).send({
+    await user.set({ isLogged: true,sessionCode:Helper.getSessionCode() }).save();
+    Helper.sendJWTAuthenticationCookie(res, user, user.firstName).send({
       isAdmin : isUserAdmin,  
       authorize: true,
       message: "you are authenticated",
@@ -184,12 +189,11 @@ async function authenticate(thirdParty, req, res) {
     });
   } 
   else{
-    await handleAuthenticationFailure(thirdParty,res);
+    await handleAuthenticationFailure(thirdParty,req,res);
   }
 }
-async function handleAuthenticationFailure(thirdParty, res) {
+async function handleAuthenticationFailure(thirdParty,req, res) {
   if (thirdParty){
-   console.log('registration required')   
    return res.send({ requireRegistration: true });
   }
   const blockedIP = await BlockedIP.findOne({ ip: req.ip });

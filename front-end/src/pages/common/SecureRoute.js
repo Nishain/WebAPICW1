@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Route } from "react-router";
-import { Login } from "./pages/Login/Login";
-import { useHistory } from 'react-router-dom'
+import { Login } from "../Login/Login";
 export default class SecureRoute extends Route {
   state = {
     secureFlag: undefined,
