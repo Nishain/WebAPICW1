@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Input, Button } from "antd";
+import { Input, Button, Modal } from "antd";
 import { CategoryValues, CategoryTypes } from "./extranalData";
 import axios from "axios";
 
@@ -9,29 +9,39 @@ export default function Category() {
   const [categorySelect, setCategorySelect] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadCategory, setLoadCategory] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
   const onChangeHandler = (type) => (e) => {
     setCategory({
       ...category,
       [type]: e.target.value,
     });
   };
-  const onChangeSelectHandler =  (e) => {
-    debugger
-    setCategorySelect( e.target.value,
-    );
-    getFrechApi( e.target.value)
+  const onChangeSelectHandler = (e) => {
+    debugger;
+    setCategorySelect(e.target.value);
+    getFrechApi(e.target.value);
   };
   const onChangeEditHandler = (type) => (e) => {
-    setCategoryEdit(e.target.value
-    );
+    setCategoryEdit(e.target.value);
   };
-const getFrechApi = async(id) =>{
-  debugger
-  const url=`http://localhost:5000/Admin/category/${id}`
-  const result = await axios.get(url);
-  
-  setCategoryEdit(result && result.data? result.data.price :"");
-}
+  const getFrechApi = async (id) => {
+    debugger;
+    const url = `http://localhost:5000/Admin/category/${id}`;
+    const result = await axios.get(url);
+
+    setCategoryEdit(result && result.data ? result.data.price : "");
+  };
 
   const fetchApi = async () => {
     const result = await axios.get("http://localhost:5000/Admin/category");
@@ -47,6 +57,9 @@ const getFrechApi = async(id) =>{
       "http://localhost:5000/Admin/category",
       category
     );
+    if (result.data.success) {
+      showModal();
+    }
     if (result && result.data) {
       setLoading(false);
     } else {
@@ -54,12 +67,12 @@ const getFrechApi = async(id) =>{
     }
   };
   const putCategory = async () => {
-    debugger
-    const url=`http://localhost:5000/Admin/category/${categorySelect}`
+    debugger;
+    const url = `http://localhost:5000/Admin/category/${categorySelect}`;
     const result = await axios.put(
       url,
-    
-      {"price":categoryEdit}
+
+      { price: categoryEdit }
     );
     // if (result && result.data) {
     //   setLoading(false);
@@ -68,11 +81,9 @@ const getFrechApi = async(id) =>{
     // }
   };
   const deleteCategory = async () => {
-    debugger
-    const url=`http://localhost:5000/Admin/category/${categorySelect}`
-    const result = await axios.delete(
-      url
-    );
+    debugger;
+    const url = `http://localhost:5000/Admin/category/${categorySelect}`;
+    const result = await axios.delete(url);
     // if (result && result.data) {
     //   setLoading(false);
     // } else {
@@ -119,8 +130,11 @@ const getFrechApi = async(id) =>{
             <div className="card-body">
               <div className="form-group">
                 <label>Category Name</label>
-                <select className="form-control" value={categorySelect} onChange={onChangeSelectHandler}>
-                  
+                <select
+                  className="form-control"
+                  value={categorySelect}
+                  onChange={onChangeSelectHandler}
+                >
                   {loadCategory.length > 0 &&
                     loadCategory.map((element, index) => (
                       <option value={element._id} key={index}>
@@ -143,6 +157,16 @@ const getFrechApi = async(id) =>{
               <Button type="danger" onClick={deleteCategory}>
                 Delete
               </Button>
+              <Modal
+                title="Basic Modal"
+                visible={isModalVisible}
+                onOk={handleOk}
+                onCancel={handleCancel}
+              >
+                <p>Some contents...</p>
+                <p>Some contents...</p>
+                <p>Some contents...</p>
+              </Modal>
             </div>
           </div>
         </div>

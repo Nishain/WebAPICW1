@@ -3,14 +3,14 @@ import ReactDOM from "react-dom";
 import { Route, Switch, BrowserRouter as Router } from "react-router-dom";
 import "./index.css";
 import { Login } from "./pages/Login/Login";
-import { Dashboard as Customer } from "./pages/CustomerDashboard/Dashboard";
+import Home from "./pages/CustomerDashboard/Home";
+import Dashboard from './pages/Admin/Dashboard/Dashboard'
 import ProductView from "./pages/ProductView/ProductView";
 import Cart from "./pages/Cart/Cart";
 import Invoice from "./pages/Invoice/Invoice";
 import checkout from "./pages/CheckOut/CheckOut";
 import adminLogin from "./pages/Admin/Login/adminLogin";
 import Layout from "./pages/Admin/Shared/Layout/Layout";
-import Dashboard from "./pages/Admin/Dashboard/Dashboard";
 import UserProfile from "./pages/Admin/UserProfile/UserProfile";
 import Orders from "./pages/Admin/Orders/Orders";
 import CourierService from "./pages/Admin/CourierService/CourierService";
@@ -27,20 +27,27 @@ import "bootstrap/dist/js/bootstrap.js";
 import "antd/dist/antd.css"
 // import ProductView from "./pages/ProductView/ProductView";
 import SecureRoute from "./SecureRoute";
+import {Dashboard as Customer} from './pages/CustomerDashboard/Dashboard'
 axios.defaults.withCredentials = true
 function render(){
+  const homeRoutes = [
+    {
+      path : 'Home/something',
+      component : Customer
+    }
+  ]
   ReactDOM.render(
     <React.StrictMode>
       <Router>
         <Switch>
-          <SecureRoute exact path="/" component={Login} />
-          <Route exact path={endPoints.forgetPassword} render={(props)=><Login {...props} forgetPassword={true} />} />
-          <SecureRoute  exact path={endPoints.productsView} component={ProductView} /> 
+          <SecureRoute index={true} exact path="/" component={Login} />
+          <Route exact  path={endPoints.forgetPassword} render={(props)=><Login {...props} forgetPassword={true} />} />
+          <SecureRoute exact path={endPoints.productsView} component={ProductView} /> 
           <SecureRoute  exact path="/Cart" component={Cart} /> 
           <SecureRoute  exact path="/Invoice" component={Invoice}/> 
           <SecureRoute  exact path="/Checkout" component={checkout}/> 
-          <SecureRoute  exact path={endPoints.dashboard} component={Customer} />
-          <SecureRoute exact path="/AdminLogin" component={adminLogin} />
+          <Route  path={endPoints.dashboard} component={Home} />
+          <SecureRoute exact path={endPoints.adminLogin} component={adminLogin} /> 
           {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
         </Switch>
       </Router>

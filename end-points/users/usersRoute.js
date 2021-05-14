@@ -1,120 +1,48 @@
 const router = require('express').Router()
-const nodeMailer = require('nodemailer')
 const constants = require('../../constants')
 const User = require('../../models/User')
 const helper = require('../helper')
 const Helper = require('../helper')
-const RandomCodeGenerator = require('randomatic');
-const bycrypt = require('bcrypt')
-const urlSafeBase64 = require('url-safe-base64')
-const transporter = nodeMailer.createTransport({
-    service:'Gmail',
-    auth:{
-        user:process.env.email,
-        pass:process.env.password
-    },tls: {
-        // do not fail on invalid certs
-        rejectUnauthorized: false
-    }
-})
-var emailOptions = {
-    from:process.env.email,
-    to:''
-}
-async function sendCodeToEmail(role,req,res){
-    console.log({
-        user:process.env.email,
-        password:process.env.password
-    })
-    if(typeof req.body.email != 'string')
-        return Helper.fieldError(res,'Please provide a valid email address',['email'])
-    emailOptions.to = req.body.email
-    
-    const targetUser = await User.findOne({email:req.body.email})
-    if(!targetUser)
-        return helper.fieldError(res,'email does not exist',['email'])
-    const code = (role == 'forgetPassword') ? urlSafeBase64.encode(await bycrypt.hash(req.body.email + RandomCodeGenerator('Aa0',10),1)): RandomCodeGenerator('A0',10)
-    emailOptions = (role == 'forgetPassword') ? constants.designEmailContent(code,emailOptions) 
-        : constants.designEmailConfimationBody(code,emailOptions)
-    
-    transporter.sendMail(emailOptions,async (err,data)=>{
-        if(err){
-            res.send({success:false,message:err})
-        }else{
-            const paramBody = (role == 'forgetPassword') ? {forgetPasswordCode:code} : {emailConfirmationCode:code}
-            console.log(paramBody)
-            await targetUser.set(paramBody).save()
-            res.send({success:true,message:'email successfully sent!'})
-        }
-    })
-}
-router.post('/forgetPassword',async (req,res)=>{
-    sendCodeToEmail('forgetPassword',req,res)
-})
-router.post('/verify',async (req,res)=>{
-    if(typeof req.body.code == 'string'){
-        if(!helper.validateFields(req,res,{email:'String',code:'String'}))
-            return
-        const code = req.body.code 
-        const email = req.body.email   
-        const target = await User.findOne({email:email,emailConfirmationCode:code})
-        if(!target)
-            res.send({fieldError:true,message:'the user does not exist'})
-        else{
-            await target.set({isEmailConfirmed:true,emailConfirmationCode:undefined}).save()
-            helper.sendJWTAuthenticationCookie(res,email).send({confirmSuccess:true})    
-        }
-    }else
-        sendCodeToEmail('emailConfirm',req,res)
-})
-
-router.put('/forgetPassword/:code',async (req,res)=>{
-     const targetUser = await User.findOne({forgetPasswordCode:req.params.code})
-     if(req.body.editPassword){
-        if(!targetUser) 
-            return res.send({forgetPasswordPing : true, userExist:false})
-        if(!helper.validateFields(req,res,{password:'String',confirmPassword:'String'}))
-            return
-        const password = req.body.password
-        const confirmPassword = req.body.confirmPassword
-        if(password != confirmPassword)
-            return helper.fieldError(res,'password and confirm password should be same',['password','confirmPassword'])
-        await targetUser.set({forgetPasswordCode:undefined,password:password}).save()   
-        res.send({passwordChanged:true})
-     }else{
-         if(targetUser)
-            res.send({forgetPasswordPing : true, userExist:true})
-         else
-            res.send({forgetPasswordPing : true, userExist:false})   
-     }
-})
-
+const jwt = require('jsonwebtoken')
+const RandomCodeGenerator = require('randomatic')
 router.get('/',async (req,res)=>{
+    if(!getUserType(req,undefined).admin)
+        return helper.accessDenyUser('outsider','only an admin can do this',res)
     const userList = await User.find()
     userList.map(acc => {
-        var modifiedDetails = acc
-        modifiedDetails.password = undefined
-        return modifiedDetails
+        return helper.trimSensitiveData(acc)
     })
     res.send({users:userList})
 })
-router.get('/:id',async (req,res)=>{
-    if(!helper.isObjectIDValid(req.params.id))
-        return res.status(400).send({error:true,message:'object ID is not valid'})
-    const foundUser = await User.findById(req.params.id)
-    if(foundUser)
-        res.send({found:true,user:foundUser})
+async function getUserByGETParams(req,res){
+    if(!['id','email'].includes(req.params.mode)){
+        res.send({message : 'provide a valid mode'})
+        return {exitEarly : true}
+    }
+    const mode = req.params.mode    
+    var identifier = req.params.identifier
+
+    if(mode == 'id' && !helper.isObjectIDValid(identifier)){
+        res.status(400).send({error:true,message:'object ID is not valid'})
+        return {exitEarly : true}
+    }
+    if(mode == 'email' && identifier == 'auto'){
+        identifier = jwt.verify(req.cookies["jwt"].token, process.env.jwtSecret).email
+    }
+    const foundUser = await (mode=='email' ? User.findOne({email:identifier}) : User.findById(identifier))
+    return foundUser
+}
+router.get('/:mode/:identifier',async (req,res)=>{
+    const foundUser = await getUserByGETParams(req,res)
+    if(getUserType(req,foundUser.email).outsider)
+        return Helper.accessDenyUser('outsider','only admin or account owner can view their data',res)
+    if(foundUser){
+        if(foundUser.exitEarly)
+            return
+        res.send({found:true,user:helper.trimSensitiveData(foundUser)})
+    }
     else
         res.send({found:false})
-})
-router.put('/:id',async (req,res)=>{
-    if(!helper.isObjectIDValid(req.params.id))
-        return res.status(400).send({error:true,message:'object ID is not valid'})
-    const foundUser = User.findById(req.params.id)
-    if(foundUser)
-        res.send({found:true,user:helper.trimPassword(user)})
-    else
-        res.send({updated:false})
 })
 router.post('/',async (req,res)=>{
     var mapping = {}
@@ -126,7 +54,7 @@ router.post('/',async (req,res)=>{
         schemaPaths.push('password')
     for(const path of schemaPaths){
         let value = User.schema.paths[path]
-        mapping[path] = value.instance
+        mapping[path] = value.instance //data type
     }
     if(!Helper.validateFields(req,res,mapping))
         return
@@ -135,10 +63,71 @@ router.post('/',async (req,res)=>{
     }
     if(await User.findOne({email:req.body.email}))
         return helper.fieldError(res,`email address ${req.body.email} is already taken`,['email'])
-    var newUser = await new User(Helper.mapRequestBodyToObject(req,Object.keys(mapping))).save()
+    var modelBody = Helper.mapRequestBodyToObject(req,Object.keys(mapping))    
+    if(typeof req.body.adminPermissionCode == 'string'){
+        if(await User.findOne({adminPermissionCode:req.body.adminPermissionCode})){
+            modelBody.isAdmin = true,
+            adminPermissionCode = RandomCodeGenerator('Aa0',10)
+        }
+    }    
+    var newUser = await new User(modelBody).save()
     newUser = Helper.showFields(newUser,Object.keys(mapping),['password'])
     newUser.success = true
+    newUser.isAdmin = modelBody.isAdmin || false
     res.send(newUser)
 })
-
+function getUserType(req,requestedUser){
+//    
+    const loggedEmail = req.userEmail
+    var userType
+    if(requestedUser && requestedUser.email == loggedEmail){
+        userType = 'owner'
+        if(requestedUser.isAdmin)
+            userType = 'adminOwner'
+    }
+    else if(req.isAdmin)
+        userType = 'admin'
+    else
+        userType = 'outsider'      
+    return {[userType] : true}     
+}
+router.put('/:mode/:identifier',async (req,res)=>{
+    const restrictedFieldsForAll = constants.userSensitiveFields//quickSignInID
+    var restrictedFieldsForOwner = ['isActive','isEmailConfirmed','isAdmin'].concat(restrictedFieldsForAll)
+    restrictedFieldsForOwner.splice(restrictedFieldsForOwner.indexOf('password'),1) // remove password field from restriction
+    const user = await getUserByGETParams(req,res)
+    if(!user)
+        return res.send({message : 'user does not exist'})
+     if(user.exitEarly)
+        return   
+    const userType = getUserType(req,user)
+    console.log(userType)
+    if(userType.outsider)
+        return res.status(401).send({
+            user : 'outsider',
+            message:'only admin and account owner can access this endpoint'
+        })
+    if(userType.isAdmin && Helper.doesRequestBodyContainRestrictedFields(req,restrictedFieldsForAll))
+        return res.status(401).send({
+            user : 'admin',
+            message : 'your body contain fields which are restricted to be edited'
+        })
+    if((userType.owner || userType.adminOwner) && 
+        Helper.doesRequestBodyContainRestrictedFields(req,restrictedFieldsForOwner)){
+            return res.status(401).send({
+                user : 'owner',
+                message : 'your body contain fields which are restricted to be edited'
+            })
+    }        
+    var modelBody = Helper.mapRequestBodyToObject(req,undefined)
+    var mapping = {}
+    for(const path of Object.keys(modelBody)){
+        let value = User.schema.paths[path]
+        mapping[path] = value.instance //data type
+    }
+    if(!Helper.validateFields(req,res,mapping))
+        return  
+    var updatedUser = await (user.set(modelBody)).save()
+    res.send(helper.trimSensitiveData(updatedUser))
+})
 module.exports = router

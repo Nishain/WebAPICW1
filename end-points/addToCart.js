@@ -17,12 +17,16 @@ router.post('/',async (req,res)=>{
     else if(!req.body.Price){
         return res.status(400).send("Price is empty");
     }
+    else if(!req.body.unitPrice){
+        return res.status(400).send("Price is empty");
+    }
 
    let newAddToCart= new AddToCart({
     categoryName:req.body.categoryName,
     qty:req.body.qty,
     photoURL:req.body.photoURL,
     Price:req.body.Price,
+    unitPrice:req.body.unitPrice,
     Date:new Date(),
     })
 
@@ -33,26 +37,25 @@ router.post('/',async (req,res)=>{
         return Helper.badRequest(res,error)
     } 
 });
-// router.get("/invoice",async (req,res)=>{
-//     try{
-//         let invoice= await Invoice.find();
-//         res.send(invoice);
-//     }catch(ex){
-//         return Helper.badRequest(res,error)
-//     }
-    
-// });
-// router.get("/invoice/:id",async(req,res)=>{
-    
-//     let reqID=req.params.id
-//     try{
-//         let invoice= await Invoice.findById(reqID);
-//         res.send(invoice);
-//     }catch(ex){
-//         return Helper.badRequest(res,error)
-//     }
+router.get("/",async (req,res)=>{
+    try{
+        let cart= await AddToCart.find();
+        res.send(cart);
+    }catch(ex){
+        return Helper.badRequest(res,error)
+    }
+});
 
-  
-// });
+router.delete("/:id",async(req,res)=>{
+    let reqID=req.params.id
+    let deleteItem=await AddToCart.findByIdAndDelete(reqID);
+    if(!deleteItem){
+        return res.status(404).send("no such Item")
+    }
+
+
+    res.send(deleteItem);
+
+});
 
 module.exports = router

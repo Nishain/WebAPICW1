@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Route } from "react-router";
 import { Login } from "./pages/Login/Login";
+import { useHistory } from 'react-router-dom'
 export default class SecureRoute extends Route {
   state = {
     secureFlag: undefined,
@@ -9,22 +10,20 @@ export default class SecureRoute extends Route {
   async componentDidMount(){
     axios.interceptors.response.use(
         (response) => {
-            console.log(response)
+            this.setFlag(undefined)
           return response;
         },
         (error) => {
-          console.log(error);
-          if (error.response.status == 401 && error.response.data.invalidToken) {
-            console.log('cookie block')  
+          console.log(error.response.data);
+          if (!this.props.index && error.response.status == 401 && error.response.data.invalidToken) {  
             this.setFlag("invalidToken")
           } else if (
             error.response.status == 401 &&
             error.response.data.IPBlocked
           ) {
-            this.setState({ secureFlag: "IPBlock" });
-          }else if(error.response.data.accountInActive){
-              console.log('account is disabled')
-              this.setFlag("AccountDisabled")
+            this.setFlag({ secureFlag: "IPBlock" });
+          }else if((!this.props.index && error.response.data.accountInActive) || (this.props.index && error.response.data.onlogin && error.response.data.accountInActive)){
+            this.setFlag("AccountDisabled")
           }
           return error.response;
         }
@@ -59,6 +58,7 @@ export default class SecureRoute extends Route {
       propsClone.component = undefined;
       propsClone.render = (props) => {
         var loginProps = props;
+        loginProps.redirect = true
         if(Object.keys(this.flagToErrorMapping).includes(this.state.secureFlag)){
             loginProps.errorTitle = this.flagToErrorMapping[this.state.secureFlag].title
             loginProps.errorMessage = this.flagToErrorMapping[this.state.secureFlag].message

@@ -10,7 +10,7 @@ const ProductView = () => {
   const [categorySelect, setCategorySelect] = useState("");
   const [loadCategory, setLoadCategory] = useState([]);
   const [categoryEdit, setCategoryEdit] = useState(0);
-
+  const [unitPrice, setUnitPrice] = useState(0);
   const onChangeSelectHandler = (e) => {
     setCategorySelect(e.target.value);
     getFrechApi(e.target.value);
@@ -26,7 +26,8 @@ const ProductView = () => {
 const addToCart=async()=>{
   const url2 = `http://localhost:5000/Admin/category/${categorySelect}`;
     const result2 = await axios.get(url2);
-    const result3 = (await axios.get(process.env.REACT_APP_API_ENDPOINT + 'users/email/auto')).data
+    // const result3 = (await axios.get(process.env.REACT_APP_API_ENDPOINT + 'users/email/auto')).data
+    debugger
   const url=`http://localhost:5000/addToCart`
     const result = await axios.post(
       url,
@@ -36,7 +37,8 @@ const addToCart=async()=>{
         "photoURL":"test.png",
         "categoryName":result2.data.categoryName,
         "qty":category,
-        "Price":totalPrice
+        "Price":totalPrice,
+        "unitPrice": unitPrice
         
 }
 
@@ -49,6 +51,8 @@ const addToCart=async()=>{
 
     setCategoryEdit(result && result.data ? result.data.price : "");
     setTotalPrice(Number(result.data.price) * Number(category));
+    setUnitPrice(result.data.price);
+    debugger
   };
   const changeQTY = (type) => (e) => {
     debugger;

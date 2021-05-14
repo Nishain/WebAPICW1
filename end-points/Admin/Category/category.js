@@ -11,7 +11,13 @@ function mapRequestBodyToSchema(req){
 router.get('/category',async (req,res)=>{
 
     const categoryList = await Category.find()
+    if(!categoryList)
+    {
+        return res.status(404).send("no such category")
+    }
+    else{
     res.send(categoryList)
+    }
 })
 router.get('/category/:id',async (req,res)=>{
     const categoryitem = await Category.findById(req.params.id)
@@ -24,7 +30,7 @@ router.post('/category',async (req,res)=>{
     const newCategory = mapRequestBodyToSchema(req)
     try {
         await newCategory.save()
-        res.send({success:true,message:'email successfully sent!'})
+        res.send({success:true,message:'category Added Successfully'})
     } catch (error) {
         return Helper.badRequest(res,error)
     }  
