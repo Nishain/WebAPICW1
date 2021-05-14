@@ -27,6 +27,8 @@ app.use(require('./middleware/userTypeCheck'))
 app.use('/products/',require('./end-points/products/productRoute'))
 app.use('/Admin/',require('./end-points/Admin/Category/category'))
 app.use('/Admin/',require('./end-points/CourierService/CourierService'))
+app.use('/Admin/',require('./end-points/Admin/invoice/invoice'))
+app.use('/Admin/',require('./end-points/Admin/Transaction/Transaction'))
 app.use((req,res)=>{
     res.status(404).send({
         error:true,

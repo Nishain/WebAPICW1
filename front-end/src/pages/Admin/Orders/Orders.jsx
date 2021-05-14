@@ -2,7 +2,7 @@ import React, { useState,useEffect } from "react";
 import { Table, Input, Button, Space } from "antd";
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from "@ant-design/icons";
-import OrderData from "./OrdersData.json"
+import moment from 'moment';
 import axios from 'axios'
 export default function Orders() {   
   const [searchText, setSearchText] = useState("");
@@ -10,31 +10,45 @@ export default function Orders() {
   const [orderData, setorderData] = useState([]);
   const fetchApi = async () => {
     const result = await axios.get(
-      "http://localhost:5000/users"
+      "http://localhost:5000/Admin/invoice"
      
     )
     
     // setorderData(result && result.data ? result.data.users : [])
-    setorderData(OrderData)
+    setorderData(result.data)
   }
   useEffect( () => {
     fetchApi()
     
   }, []);
-  const supendUser = async(id,status)=>{
+  const viewInvoice = async(id,status)=>{
     debugger
-    const url=`http://localhost:5000/users/${id}`
-    const result = await axios.put(
-      url,
-    
-      {"isActive":status}
+    const url=`http://localhost:5000/Admin/invoice/${id}`
+    const result = await axios.get(
+      url,  
     );
+    debugger
     // if (result && result.data) {
     //   setLoading(false);
     // } else {
     //   setLoading(false);
     // }
   };
+  const createOrder=async()=>{
+    const url=`http://localhost:5000/Admin/invoice`
+    const result = await axios.post(
+      url,
+    
+      {
+        
+        "invoiceNo":"fd",
+        "TotalAmount":1450.00,
+        "Date":"2021-02-02",
+        "paymentStatus":"unpaid"
+}
+    );
+    debugger
+  }
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -145,6 +159,7 @@ export default function Orders() {
       key: "Date",
       width: "20%",
       ...getColumnSearchProps("Date"),
+      render: ((Date) => moment(Date).format('L')) 
     },
     {
       title: "Payment Status",
@@ -159,7 +174,7 @@ export default function Orders() {
       dataIndex: '_id',
     key: '_id',
     width: "20%",
-    render: (value,d) => <div>  <Button type="primary" onClick={()=>supendUser(d._id)}>View Invoice</Button></div>,
+    render: (value,d) => <div>  <Button type="primary" onClick={()=>viewInvoice(d._id)}>View Invoice</Button></div>,
     },
   ];
   return (
@@ -168,6 +183,9 @@ export default function Orders() {
         <div className="panel-heading">User Profile</div>
         <div className="panel-body">
           {orderData.length && <Table columns={columns} dataSource={orderData} />}
+          <Button type="danger" onClick={createOrder} >
+                create order
+              </Button>
           
         </div>
       </div>
