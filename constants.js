@@ -25,7 +25,7 @@ class Constants {
     }
     IPBlockedMsg = 'Your IP is being tempolary blocked'
     exceedAttemptsLogin = 'you have exceeded 3 attempts.Your IP is backlisted now'
-    userSensitiveFields = ['forgetPasswordCode','password','quickSignInID','hashSalt','emailConfirmationCode']
+    userSensitiveFields = ['forgetPasswordCode','password','quickSignInID','hashSalt','emailConfirmationCode','sessioncode']
     designEmailContent(code,object){
         object.subject='Quick photo forget password'
         object.text = `follow this link for forget password - ${this.clientURL}/forgetPassword/${code}`
