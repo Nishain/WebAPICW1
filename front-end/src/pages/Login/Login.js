@@ -396,6 +396,7 @@ export class Login extends Component {
     );
   }
   async requestEmailConfirmation(){
+    this.setState({ errorMessage: undefined });
     const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'auth/verify/',{email:this.state.Email})).data
     if(this.showErrorFieldsIfNeeded(result))
       return

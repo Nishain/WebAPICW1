@@ -73,7 +73,16 @@ const Cart = () => {
     );
     debugger;
   };
-
+  const handleFileUpload = (evt) => {
+    var uploadedFiles = this.state.uploadedFiles
+    for (let index = 0; index < evt.target.files.length; index++) {
+      uploadedFiles.push(evt.target.files[index].name);
+    }
+    this.setState({ uploadedFiles: uploadedFiles });
+  };
+  const clickFakeUpload = ()=>{
+    document.querySelector("#hiddenFileInput").click()
+  }
   return (
     <div className="container cart-wrapper">
       <div class="row table-wrapper-scroll-y my-custom-scrollbar">
@@ -119,12 +128,19 @@ const Cart = () => {
       <div className="row  btn-group  d-flex" style={{ padding: 50 }}>
         <div className="col-md-6">
           <div className="row ">
-            <Button type="Default" icon={<PlusOutlined />}>
+          <input
+                    id="hiddenFileInput"
+                    type="file"
+                    onChange={handleFileUpload}
+                    hidden={true}
+                    multiple={true}
+                    />
+            <Button type="Default" icon={<PlusOutlined />} >
               Add More Photos
             </Button>
           </div>
           <div className="row  ">
-            <Button type="Default" icon={<UploadOutlined />} danger>
+            <Button type="Default" onClick={clickFakeUpload} icon={<UploadOutlined />} danger>
               Upload More Photos
             </Button>
           </div>

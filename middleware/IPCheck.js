@@ -3,16 +3,17 @@ const contants = require('../constants')
 const mongoose = require('mongoose')
 async function IPCheck(req,res,next){
     const foundIP = await BlockedIP.findOne({ip:req.ip})
-    if(foundIP){
-        const lastDate = new Date(foundIP.lastDate)
-        const newDate = lastDate
-        newDate.setSeconds(lastDate.getSeconds()+10)
-        if(new Date().getTime() > newDate.getTime()){
-            console.log('greater time')
-             await foundIP.delete()
-             return next()
-        }
-    }
+    // if(foundIP){
+    //     const lastDate = new Date(foundIP.lastDate)
+    //     const newDate = lastDate
+    //     newDate.setSeconds(lastDate.getSeconds()+10)
+    //     console.log((new Date().getTime() - lastDate.getTime()) / 1000)
+    //     if((new Date().getTime() - lastDate.getTime()) / 1000 > 10){
+    //         console.log('greater time')
+    //          await foundIP.delete()
+    //          return next()
+    //     }
+    // }
         
     if(foundIP && foundIP.attempts > 2){
         

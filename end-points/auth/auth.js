@@ -204,6 +204,7 @@ async function handleAuthenticationFailure(thirdParty,req, res) {
      // await blockedIP.set(params).save();
       return res.status(401).send({ message: constants.exceedAttemptsLogin });
     } else {
+      console.log('running here')
       params.attempts = blockedIP.attempts + 1;
     }
     await blockedIP.set(params).save();

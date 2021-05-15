@@ -19,7 +19,7 @@ export class Dashboard extends Component {
   handleFileUpload = (evt) => {
     var uploadedFiles = this.state.uploadedFiles
     for (let index = 0; index < evt.target.files.length; index++) {
-      uploadedFiles.push(evt.target.files[index].name);
+      uploadedFiles.push(evt.target.files[index]);
     }
     this.setState({ uploadedFiles: uploadedFiles });
   };
@@ -27,6 +27,29 @@ export class Dashboard extends Component {
       const deleteIndex = this.state.uploadedFiles.indexOf(file)
       this.state.uploadedFiles.splice(deleteIndex,1)
       this.setState({uploadedFiles:this.state.uploadedFiles})
+  }
+  saveOnDatabase = async () =>{
+    console.log('function called!')
+    if(!this.state.uploadedFiles)
+      return
+    var formData = new FormData()
+    console.log(this.state.uploadedFiles.length)
+    for(const file of this.state.uploadedFiles){
+      formData.append("files",file)
+    }
+    
+  
+    for(const s of formData.values()){
+      console.log(s)
+    }
+    const config = {
+      headers: {
+          'content-type': 'multipart/form-data'
+      }
+    };
+    console.log(formData)
+    const result = (await axios.post(process.env.REACT_APP_API_ENDPOINT + 'upload/',formData,{headers:{}})).data
+    console.log(result)
   }
   render() {
     return (
@@ -62,12 +85,13 @@ export class Dashboard extends Component {
                     >
                     Upload photos
                     </button>
+                    <button className='ml-2 btn btn-info' type='button' onClick={this.saveOnDatabase}>Save on database</button>
                 </div>    
                 <div className="card-body col">
                     <ul className="list-group list-group-flush">
                         {this.state.uploadedFiles.slice(0,3).map(file=>
                             <li className="list-group-item">
-                                <span >{file}</span><button className="btn btn-outline-danger float-right" onClick={()=>this.removeFile(file)}>Remove</button>
+                                <span >{file.name}</span><button className="btn btn-outline-danger float-right" onClick={()=>this.removeFile(file)}>Remove</button>
                             </li>
                         )}
                     </ul>
