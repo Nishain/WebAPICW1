@@ -1,50 +1,42 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Input, Button, Space } from "antd";
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from "@ant-design/icons";
-import moment from 'moment';
-import axios from 'axios'
-export default function Transaction() {   
+import moment from "moment";
+import axios from "axios";
+export default function Transaction() {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [orderData, setorderData] = useState([]);
   const fetchApi = async () => {
-    const result = await axios.get(
-      "http://localhost:5000/Admin/transaction"
-     
-    )
-    debugger
-    // setorderData(result && result.data ? result.data.users : [])
-    setorderData(result.data)
-  }
-  useEffect( () => {
-    fetchApi()
-    
+    const result = await axios.get("http://localhost:5000/Admin/transaction");
+
+    setorderData(result.data);
+  };
+  useEffect(() => {
+    fetchApi();
   }, []);
-  const createTransaction=async()=>{
-    const url=`http://localhost:5000/Admin/transaction`
+  const createTransaction = async () => {
+    const url = `http://localhost:5000/Admin/transaction`;
     const result = await axios.post(
       url,
-    
+
       {
-        
-        "InvoiceNumber": 3,
-        "PaymentId":452,
-        "Amount":4250.00,
-        "Status":"Success",
-        "Method":"Visa",
-        "Date":"2021-02-12"
+        InvoiceNumber: 3,
+        PaymentId: 452,
+        Amount: 4250.0,
+        Status: "Success",
+        Method: "Visa",
+        Date: "2021-02-12",
       }
     );
-    debugger
-  }
-  const supendUser = async(id,status)=>{
-    debugger
-    const url=`http://localhost:5000/users/${id}`
+  };
+  const supendUser = async (id, status) => {
+    const url = `http://localhost:5000/users/${id}`;
     const result = await axios.put(
       url,
-    
-      {"isActive":status}
+
+      { isActive: status }
     );
     // if (result && result.data) {
     //   setLoading(false);
@@ -183,21 +175,20 @@ export default function Transaction() {
       key: "Date",
       width: "20%",
       ...getColumnSearchProps("Date"),
-      render: ((Date) => moment(Date).format('L')) 
+      render: (Date) => moment(Date).format("L"),
     },
-    
-
   ];
   return (
     <div className="container user-wrapper">
       <div className="panel panel-default">
-        <div className="panel-heading">User Profile</div>
+        <div className="panel-heading">Transactions</div>
         <div className="panel-body">
-          {orderData.length && <Table columns={columns} dataSource={orderData} />}
-          <Button type="danger" onClick={createTransaction} >
-                create Transaction
-              </Button>
-          
+          {orderData.length && (
+            <Table columns={columns} dataSource={orderData} />
+          )}
+          <Button type="danger" onClick={createTransaction}>
+            create Transaction
+          </Button>
         </div>
       </div>
     </div>

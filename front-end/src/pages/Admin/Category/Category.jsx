@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Input, Button, Modal,Popconfirm, message  } from "antd";
-import { CategoryValues, CategoryTypes,CategoryEdit } from "./extranalData";
+import { Input, Button, Modal, Popconfirm, message } from "antd";
+import { CategoryValues, CategoryTypes, CategoryEdit } from "./extranalData";
 import axios from "axios";
 
 export default function Category() {
@@ -10,7 +10,7 @@ export default function Category() {
   const [loading, setLoading] = useState(false);
   const [loadCategory, setLoadCategory] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [messagelog,setMessage]=useState("");
+  const [messagelog, setMessage] = useState("");
   const showModal = () => {
     setIsModalVisible(true);
   };
@@ -29,9 +29,7 @@ export default function Category() {
     });
   };
   const onFocusHandler = (type) => (e) => {
-    debugger
-    if(e.target.value=="0.00")
-    {
+    if (e.target.value == "0.00") {
       setCategory({
         ...category,
         [type]: "",
@@ -39,8 +37,7 @@ export default function Category() {
     }
   };
   const onFocusOutHandler = (type) => (e) => {
-    if(e.target.value=="")
-    {
+    if (e.target.value == "") {
       setCategory({
         ...category,
         [type]: "0.00",
@@ -48,7 +45,6 @@ export default function Category() {
     }
   };
   const onChangeSelectHandler = (e) => {
-    debugger;
     setCategorySelect(e.target.value);
     getFrechApi(e.target.value);
   };
@@ -56,7 +52,6 @@ export default function Category() {
     setCategoryEdit(e.target.value);
   };
   const getFrechApi = async (id) => {
-    debugger;
     const url = `http://localhost:5000/Admin/category/${id}`;
     const result = await axios.get(url);
 
@@ -72,22 +67,19 @@ export default function Category() {
     fetchApi();
   }, []);
   const addCategory = async () => {
-    debugger
     setLoading(true);
     const result = await axios.post(
       "http://localhost:5000/Admin/category",
       category
     );
-      
+
     if (result.data.success) {
-      setMessage(result.data.message)
-     
+      setMessage(result.data.message);
+
       showModal();
-      
-    }
-    else if(result.status==400){
-      setMessage(result.data.message)
-     
+    } else if (result.status == 400) {
+      setMessage(result.data.message);
+
       showModal();
     }
     if (result && result.data) {
@@ -97,46 +89,30 @@ export default function Category() {
     }
   };
   function confirm(e) {
-    deleteCategory()
+    deleteCategory();
   }
-  
-  function cancel(e) {
-   
-  }
+
+  function cancel(e) {}
   const putCategory = async () => {
-    debugger;
     const url = `http://localhost:5000/Admin/category/${categorySelect}`;
     const result = await axios.put(
       url,
 
-      {categoryName:categorySelect, price: categoryEdit }
+      { categoryName: categorySelect, price: categoryEdit }
     );
-    if (result.status==200) {
-      setMessage(result.data)
-     
+    if (result.status == 200) {
+      setMessage(result.data);
+
       showModal();
-      
-    }
-    else if(result.status==400){
-      setMessage(result.data.message)
-     
+    } else if (result.status == 400) {
+      setMessage(result.data.message);
+
       showModal();
     }
-    // if (result && result.data) {
-    //   setLoading(false);
-    // } else {
-    //   setLoading(false);
-    // }
   };
   const deleteCategory = async () => {
-    debugger;
     const url = `http://localhost:5000/Admin/category/${categorySelect}`;
     const result = await axios.delete(url);
-    // if (result && result.data) {
-    //   setLoading(false);
-    // } else {
-    //   setLoading(false);
-    // }
   };
 
   return (
@@ -154,7 +130,6 @@ export default function Category() {
                   placeholder="Basic usage"
                   value={category.categoryName}
                   onChange={onChangeHandler(CategoryTypes.category)}
-                  
                 />
               </div>
               <div className="form-group">
@@ -206,15 +181,13 @@ export default function Category() {
                 Edit
               </Button>
               <Popconfirm
-    title="Are you sure to delete this task?"
-    onConfirm={confirm}
-    onCancel={cancel}
-    okText="Yes"
-    cancelText="No"
-  >
-              <Button type="danger" >
-                Delete
-              </Button>
+                title="Are you sure to delete this task?"
+                onConfirm={confirm}
+                onCancel={cancel}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button type="danger">Delete</Button>
               </Popconfirm>
               <Modal
                 title="Basic Modal"
@@ -222,7 +195,7 @@ export default function Category() {
                 onOk={handleOk}
                 onCancel={handleCancel}
               >
-               {messagelog}
+                {messagelog}
               </Modal>
             </div>
           </div>

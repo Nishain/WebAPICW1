@@ -1,54 +1,40 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Input, Button, Space } from "antd";
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from "@ant-design/icons";
-import moment from 'moment';
-import axios from 'axios'
-export default function Orders() {   
+import moment from "moment";
+import axios from "axios";
+export default function Orders() {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [orderData, setorderData] = useState([]);
   const fetchApi = async () => {
-    const result = await axios.get(
-      "http://localhost:5000/Admin/invoice"
-     
-    )
-    
-    // setorderData(result && result.data ? result.data.users : [])
-    setorderData(result.data)
-  }
-  useEffect( () => {
-    fetchApi()
-    
-  }, []);
-  const viewInvoice = async(id,status)=>{
-    debugger
-    const url=`http://localhost:5000/Admin/invoice/${id}`
-    const result = await axios.get(
-      url,  
-    );
-    debugger
-    // if (result && result.data) {
-    //   setLoading(false);
-    // } else {
-    //   setLoading(false);
-    // }
+    const result = await axios.get("http://localhost:5000/Admin/invoice");
+
+    setorderData(result.data);
   };
-  const createOrder=async()=>{
-    const url=`http://localhost:5000/Admin/invoice`
+  useEffect(() => {
+    fetchApi();
+  }, []);
+  const viewInvoice = async (id, status) => {
+    debugger;
+    const url = `http://localhost:5000/Admin/invoice/${id}`;
+    const result = await axios.get(url);
+  };
+  const createOrder = async () => {
+    const url = `http://localhost:5000/Admin/invoice`;
     const result = await axios.post(
       url,
-    
+
       {
-        
-        "invoiceNo":"fd",
-        "TotalAmount":1450.00,
-        "Date":"2021-02-02",
-        "paymentStatus":"unpaid"
-}
+        invoiceNo: "fd",
+        TotalAmount: 1450.0,
+        Date: "2021-02-02",
+        paymentStatus: "unpaid",
+      }
     );
-    debugger
-  }
+    debugger;
+  };
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -159,7 +145,7 @@ export default function Orders() {
       key: "Date",
       width: "20%",
       ...getColumnSearchProps("Date"),
-      render: ((Date) => moment(Date).format('L')) 
+      render: (Date) => moment(Date).format("L"),
     },
     {
       title: "Payment Status",
@@ -171,22 +157,30 @@ export default function Orders() {
     ,
     {
       title: "",
-      dataIndex: '_id',
-    key: '_id',
-    width: "20%",
-    render: (value,d) => <div>  <Button type="primary" onClick={()=>viewInvoice(d._id)}>View Invoice</Button></div>,
+      dataIndex: "_id",
+      key: "_id",
+      width: "20%",
+      render: (value, d) => (
+        <div>
+          {" "}
+          <Button type="primary" onClick={() => viewInvoice(d._id)}>
+            View Invoice
+          </Button>
+        </div>
+      ),
     },
   ];
   return (
     <div className="container user-wrapper">
       <div className="panel panel-default">
-        <div className="panel-heading">User Profile</div>
+        <div className="panel-heading">Orders</div>
         <div className="panel-body">
-          {orderData.length && <Table columns={columns} dataSource={orderData} />}
-          <Button type="danger" onClick={createOrder} >
-                create order
-              </Button>
-          
+          {orderData.length && (
+            <Table columns={columns} dataSource={orderData} />
+          )}
+          <Button type="danger" onClick={createOrder}>
+            create order
+          </Button>
         </div>
       </div>
     </div>
