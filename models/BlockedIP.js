@@ -3,7 +3,7 @@ const schema = mongoose.Schema({
     ip:String,
     lastDate:{
         type:Date,
-        default:Date.now
+        default:new Date().toISOString()//Date.now
     },
     attempts:{
         type:Number,

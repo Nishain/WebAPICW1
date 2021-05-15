@@ -37,14 +37,10 @@ function render(){
           <SecureRoute  exact path="/Checkout" component={checkout}/> 
           <Route  path={endPoints.dashboard} component={Home} />
           <SecureRoute exact path={endPoints.adminLogin} component={adminLogin} /> 
-          
+          {/* admin */}
+          <SecureRoute path='/Admin' component={AdminRoute} />
           {/* <Route exact path="/AdminDashboard" component={Layout} /> */}
         </Switch>
-      </Router>
-      {/* admin */}
-      <Router>
-        <SecureRoute path='/Admin' component={AdminRoute} />
-        
       </Router>
       
       </React.StrictMode>,

@@ -2,7 +2,7 @@ const Helper = require('../end-points/helper');
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
 const getUserType = async (req,res,next)=>{
-    const exceptionList = []
+    const exceptionList = ['/Admin/courierservicename','/Admin/invoice']
     if(exceptionList.findIndex(p=>req.path.startsWith(p)) > -1)
         return next()
     var data

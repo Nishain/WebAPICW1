@@ -47,9 +47,9 @@ export default class TopNavigation extends Component {
     Menu <span class="badge badge-light">{this.props.notificationCount}</span>
   </button>
   <div className="dropdown-menu dropdown-menu-right">
-    <div className="dropdown-item">{this.getUserName()}<img className="profileAvatar float-right" src={sessionStorage.getItem('profileImage')}/></div>
+    <Link className="dropdown-item" to='/home/edit'>{this.getUserName()}<img className="profileAvatar float-right" src={sessionStorage.getItem('profileImage')}/></Link>
     <Link className="dropdown-item">My Cart <span className="badge badge-danger">4</span></Link> 
-    <Link className="dropdown-item">Another action</Link> 
+    <Link className="dropdown-item" to='/home/'>Home</Link> 
     <Link className="dropdown-item d-flex ">Notifications <span className="badge badge-danger">{this.props.notificationCount}</span></Link> 
     <div className="dropdown-divider"></div>
     <Link className="dropdown-item" onClick={this.signOut}>Sign Out</Link> 

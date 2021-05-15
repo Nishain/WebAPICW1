@@ -198,10 +198,10 @@ async function handleAuthenticationFailure(thirdParty,req, res) {
    return res.send({ requireRegistration: true });
   }
   const blockedIP = await BlockedIP.findOne({ ip: req.ip });
-  var params = { lastDate: Date.now() };
+  var params = { };
   if (blockedIP) {
     if (blockedIP.attempts > 2) {
-      await blockedIP.set(params).save();
+     // await blockedIP.set(params).save();
       return res.status(401).send({ message: constants.exceedAttemptsLogin });
     } else {
       params.attempts = blockedIP.attempts + 1;

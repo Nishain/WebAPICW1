@@ -71,8 +71,9 @@ router.post('/',async (req,res)=>{
     var modelBody = Helper.mapRequestBodyToObject(req,Object.keys(mapping))    
     if(typeof req.body.adminPermissionCode == 'string'){
         if(await User.findOne({adminPermissionCode:req.body.adminPermissionCode})){
-            modelBody.isAdmin = true,
-            adminPermissionCode = RandomCodeGenerator('Aa0',10)
+            modelBody.isAdmin = true
+            const adminPermissionCode = RandomCodeGenerator('Aa0',10)
+            modelBody.adminPermissionCode = adminPermissionCode
         }
     }    
     var newUser = await new User(modelBody).save()
@@ -82,12 +83,11 @@ router.post('/',async (req,res)=>{
     res.send(newUser)
 })
 function getUserType(res,requestedUser){
-//    askdjas
     const loggedEmail = res.locals.userEmail
     var userType
+    console.log(res.locals)
     if(requestedUser && requestedUser.email == loggedEmail){
         userType = 'owner'
- 
     }
     else if(res.locals.isAdmin)
         userType = 'admin'

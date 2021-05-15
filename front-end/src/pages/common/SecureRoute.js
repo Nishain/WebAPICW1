@@ -28,13 +28,12 @@ export default class SecureRoute extends Route {
             this.setFlag({ secureFlag: "IPBlock" });
           }else if((!this.props.index && error.response.data.accountInActive) || (this.props.index && error.response.data.onlogin && error.response.data.accountInActive)){
             this.setFlag("AccountDisabled")
-          }else if(error.response.data.adminDomain){
+          }else if(!this.props.index && error.response.data.adminDomain){
             this.setFlag("AdminDomain")
           }
           return error.response;
         }
       );
-       axios.get(process.env.REACT_APP_API_ENDPOINT + `ping/${this.props.path.toLowerCase().includes('admin') ? 'admin' : 'normal'}`)
   }
   setFlag(flag){
       if(this.state.secureFlag == flag)

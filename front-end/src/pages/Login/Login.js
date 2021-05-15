@@ -100,7 +100,6 @@ export class Login extends Component {
     console.log(result);
   }
   async checkValidForgetPasswordGateway() {
-    await axios.get(process.env.REACT_APP_API_ENDPOINT);
     if(this.props.forgetPassword){
       const result = (await axios.put(process.env.REACT_APP_API_ENDPOINT + "auth/forgetPassword/" + this.props.match.params.code)).data
       if(result.forgetPasswordPing && !result.userExist){
@@ -298,7 +297,7 @@ export class Login extends Component {
         default :this.state.thirdPartySignUp.email,
         field:"Email",
         setDefaultValueSilently:this.setDefaultValueSilently
-      }] : ["Email","Password","Confirm Password","adminPermissionCode"],
+      }] : ["Email","Password","Confirm Password","Admin Permission Code"],
       [ "First Name","Last Name","Phone Number","Address"],
       [ "City","Zip Code","District"]
     ]
@@ -343,14 +342,14 @@ export class Login extends Component {
         {this.renderInputFieldFragments(this.state.isLogin)}
         <div className="half p-4 py-md-5 bg-primary">
           <div className="form-group d-md-flex">
-            <div className="w-50 text-left">
+            {/* <div className="w-50 text-left">
               <label className="checkbox-wrap checkbox-primary mb-0">
                 Remember Me
                 <input type="checkbox" checked={this.state.rememberMe == 2} onChange={this.rememberMe} />
                 <span className="checkmark"></span>
               </label>
-            </div>
-            <div className="w-50 text-md-right">
+            </div> */}
+            <div className="w-50 text-md-center">
               <a onClick={this.requestForgetPassword}>Forgot Password</a>
             </div>
           </div>

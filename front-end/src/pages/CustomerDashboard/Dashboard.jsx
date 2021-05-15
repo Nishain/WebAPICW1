@@ -12,6 +12,10 @@ export class Dashboard extends Component {
   state = {
     uploadedFiles:[],
   };
+  getInvoices = async()=>{
+    const result = (await axios.get(process.env.REACT_APP_API_ENDPOINT + 'Admin/invoice/')).data
+    console.log(result)
+  }
   handleFileUpload = (evt) => {
     var uploadedFiles = this.state.uploadedFiles
     for (let index = 0; index < evt.target.files.length; index++) {
@@ -32,7 +36,7 @@ export class Dashboard extends Component {
             <div className="card-body">
               <h5 className="card-title">Notifications</h5>
               <p className="card-text">Your Order is ready collect them</p>
-              <button className="btn btn-info">View invoice</button>
+              <button className="btn btn-info" onClick={this.getInvoices}>View invoice</button>
               <p className="card-text">
                 <small className="text-muted">Last updated 3 mins ago</small>
               </p>
